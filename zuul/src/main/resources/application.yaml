@@ -1,0 +1,6 @@
+server:
+  port: 8080
+zuul:
+  routes:
+    reporter:
+      url: 'http://localhost:8090/'

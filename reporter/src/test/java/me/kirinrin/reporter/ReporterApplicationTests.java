@@ -1,10 +1,10 @@
-package me.kirinrin.microservice;
+package me.kirinrin.reporter;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MicroserviceApplicationTests {
+class ReporterApplicationTests {
 
     @Test
     void contextLoads() {
