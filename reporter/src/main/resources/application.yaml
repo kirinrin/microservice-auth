@@ -2,5 +2,11 @@ spring:
   application:
     name: reporter
 server:
-  port: 8090
-
+  port: 7071
+eureka:
+  client:
+    service‐url:
+      defaultZone: http://localhost:7079/eureka
+  instance:
+    prefer‐ip‐address: true  #访问路径可以显示ip地址
+    instance-id: USER-SERVICE   #自定义服务名称

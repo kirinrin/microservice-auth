@@ -1,0 +1,22 @@
+server:
+  port: 7079  #注册中心的地址
+spring:
+  application:
+    name: eureka-server
+eureka:
+  instance:
+    hostname: localhost
+    lease-renewal-interval-in-seconds: 1  #心跳检测检测时间,每间隔1s,向服务端发送一次心跳,表明自己依然”存活“
+    lease-expiration-duration-in-seconds: 2 #续约时间,告诉服务端，如果我2s之内没有给你发心跳,就代表我“死”了,将我剔除
+  server:
+    enable-self-preservation: false #关闭自我保护机制
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+    register-with-eureka: false # 对于注册中心的优化,表明不向注册中心注册自己
+    fetch-registry: false # 注册中心的优化，代表该注册中心服务，不拉取任何的服务列表
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  #因为springboot2.1必须加上,支持访问/actuator/hystrix.stream

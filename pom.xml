@@ -24,11 +24,20 @@
     <modules>
         <module>reporter</module>
         <module>zuul</module>
+        <module>eureka</module>
     </modules>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <dependency>
@@ -73,6 +82,11 @@
             <dependency>
                 <groupId>me.kirinrin</groupId>
                 <artifactId>zuul</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>me.kirinrin</groupId>
+                <artifactId>eureka</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>
