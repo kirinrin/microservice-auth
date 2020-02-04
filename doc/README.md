@@ -184,4 +184,6 @@ https://felord.cn/categories/spring-security/page/2/
 
 [zuul+security+oauth+jwt 英文](https://www.baeldung.com/spring-security-zuul-oauth-jwt)
 
+[Using JWT with Spring Security OAuth](https://www.baeldung.com/spring-security-oauth-jwt)
+
 [采用Zuul网关和Spring Security搭建一个基于JWT的全局验证架构](https://blog.csdn.net/daijinmingcn/article/details/79261610)

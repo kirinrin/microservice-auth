@@ -1,4 +1,4 @@
-package me.kirinrin.demo;
+package me.kirinrin.eureka;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
