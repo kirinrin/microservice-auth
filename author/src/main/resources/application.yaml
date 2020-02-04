@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: author
+server:
+  port: 7072
+eureka:
+  client:
+    service‐url:
+      defaultZone: http://localhost:7079/eureka
+  instance:
+    prefer‐ip‐address: true  #访问路径可以显示ip地址
+    instance-id: USER-SERVICE   #自定义服务名称
