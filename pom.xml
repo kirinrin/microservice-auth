@@ -20,6 +20,7 @@
         <spring-cloud.version>Hoxton.SR1</spring-cloud.version>
         <oauth.version>2.4.0.RELEASE</oauth.version>
         <jwt.version>1.1.0.RELEASE</jwt.version>
+        <hutool.version>4.5.5</hutool.version>
     </properties>
 
     <!-- 模块说明：这里声明多个子模块 -->
@@ -54,6 +55,12 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
