@@ -4,7 +4,9 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-
+/**
+ * @author Kirinrin
+ */
 public class RbacPermission {
 //    UserDetailsServiceAutoConfiguration;
 //    UserDetails;

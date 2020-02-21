@@ -2,7 +2,9 @@ package me.kirinrin.author.service;
 
 
 import me.kirinrin.author.entity.SysUser;
-
+/**
+ * @author Kirinrin
+ */
 public interface SysUserService {
     /**
      * Query by username sys user.

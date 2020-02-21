@@ -1,7 +1,9 @@
 package me.kirinrin.author.entity;
 
 import lombok.Data;
-
+/**
+ * @author Kirinrin
+ */
 @Data
 public class SysUser {
     private Integer userId;

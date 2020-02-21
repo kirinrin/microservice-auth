@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 
 /**
  * 登录控制器
+ * @author Kirinrin
  */
 @RestController
 @Slf4j

@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * @author Kirinrin
+ */
 @Component
 @Slf4j
 public class AccessFilter extends ZuulFilter {
