@@ -90,7 +90,6 @@ public class PreLoginFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        log.info("选择登录方式");
         ParameterRequestWrapper parameterRequestWrapper = new ParameterRequestWrapper((HttpServletRequest) request);
         if (requiresAuthenticationRequestMatcher.matches((HttpServletRequest) request)) {
             log.info("选择登录方式 match");

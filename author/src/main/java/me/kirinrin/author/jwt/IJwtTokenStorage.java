@@ -6,7 +6,7 @@ package me.kirinrin.author.jwt;
  * @author Dax
  * @since 13 :25  2018/9/21
  */
-public interface JwtTokenStorage {
+public interface IJwtTokenStorage {
 
 
     /**

@@ -10,7 +10,7 @@ import org.springframework.cache.annotation.Cacheable;
  * @author Dax
  * @since 13 :28  2018/9/21
  */
-public class JwtTokenCacheStorage implements JwtTokenStorage {
+public class JwtTokenCacheStorage implements IJwtTokenStorage {
     /**
      * 查看缓存配置文件 ehcache.xml 定义 过期时间与 refresh token 过期一致.
      */

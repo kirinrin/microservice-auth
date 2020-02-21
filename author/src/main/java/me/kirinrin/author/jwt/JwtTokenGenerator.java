@@ -30,7 +30,7 @@ public class JwtTokenGenerator {
     private JwtPayloadBuilder jwtPayloadBuilder = new JwtPayloadBuilder();
     private JwtProperties jwtProperties;
 
-    private JwtTokenStorage jwtTokenStorage;
+    private IJwtTokenStorage jwtTokenStorage;
     private KeyPair keyPair;
 
     /**
@@ -39,7 +39,7 @@ public class JwtTokenGenerator {
      * @param jwtTokenStorage the jwt token storage
      * @param jwtProperties   the jwt properties
      */
-    public JwtTokenGenerator(JwtTokenStorage jwtTokenStorage, JwtProperties jwtProperties) {
+    public JwtTokenGenerator(IJwtTokenStorage jwtTokenStorage, JwtProperties jwtProperties) {
         this.jwtTokenStorage = jwtTokenStorage;
         this.jwtProperties = jwtProperties;
 

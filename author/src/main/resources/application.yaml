@@ -40,7 +40,7 @@ eureka:
 # 日志
 logging:
   level:
-    cn.felord.spring.security.mapper: debug
+    meme.kirinrin.author: debug
     org.springframework.security: debug
 
 # mybatis 配置

@@ -1,10 +1,15 @@
 package me.kirinrin.author.config;
 
+import me.kirinrin.author.exception.SimpleAccessDeniedHandler;
+import me.kirinrin.author.exception.SimpleAuthenticationEntryPoint;
 import me.kirinrin.author.filter.JsonLoginPostProcessor;
+import me.kirinrin.author.filter.JwtAuthenticationFilter;
 import me.kirinrin.author.filter.LoginPostProcessor;
 import me.kirinrin.author.filter.PreLoginFilter;
 import me.kirinrin.author.handler.CustomLogoutHandler;
 import me.kirinrin.author.handler.CustomLogoutSuccessHandler;
+import me.kirinrin.author.jwt.JwtTokenGenerator;
+import me.kirinrin.author.jwt.IJwtTokenStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -16,11 +21,11 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.annotation.Resource;
 import java.util.Collection;
 
 /**
@@ -58,13 +63,27 @@ public class CustomSpringBootWebSecurityConfiguration {
     }
 
     /**
+     * Jwt 认证过滤器.
+     *
+     * @param jwtTokenGenerator jwt 工具类 负责 生成 验证 解析
+     * @param jwtTokenStorage   jwt 缓存存储接口
+     * @return the jwt authentication filter
+     */
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenGenerator jwtTokenGenerator, IJwtTokenStorage jwtTokenStorage) {
+        return new JwtAuthenticationFilter(jwtTokenGenerator, jwtTokenStorage);
+    }
+
+    /**
      * The type Default configurer adapter.
      */
     @Configuration
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     static class DefaultConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
-        @Resource
+        @Autowired
+        private JwtAuthenticationFilter jwtAuthenticationFilter;
+        @Autowired
         private PreLoginFilter preLoginFilter;
         @Autowired
         private AuthenticationSuccessHandler authenticationSuccessHandler;
@@ -86,9 +105,18 @@ public class CustomSpringBootWebSecurityConfiguration {
             http.csrf().disable()
                     .cors()
                     .and()
+                    // session 生成策略用无状态策略
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
+                    .exceptionHandling().accessDeniedHandler(new SimpleAccessDeniedHandler()).authenticationEntryPoint(new SimpleAuthenticationEntryPoint())
+                    .and()
+                    .authorizeRequests().antMatchers("/foo/test").hasRole("ADMIN")
+                    .and()
                     .authorizeRequests().anyRequest().authenticated()
                     .and()
                     .addFilterBefore(preLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                    // jwt 必须配置于 UsernamePasswordAuthenticationFilter 之前
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                     // 登录  成功后返回jwt token  失败后返回 错误信息
                     .formLogin().loginProcessingUrl(LOGIN_PROCESSING_URL).successHandler(authenticationSuccessHandler).failureHandler(authenticationFailureHandler)
                     .and().logout().addLogoutHandler(new CustomLogoutHandler()).logoutSuccessHandler(new CustomLogoutSuccessHandler());

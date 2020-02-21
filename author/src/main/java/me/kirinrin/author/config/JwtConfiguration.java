@@ -38,7 +38,7 @@ public class JwtConfiguration {
      * @return the jwt token storage
      */
     @Bean
-    public JwtTokenStorage jwtTokenStorage() {
+    public IJwtTokenStorage jwtTokenStorage() {
         return new JwtTokenCacheStorage();
     }
 
@@ -51,7 +51,7 @@ public class JwtConfiguration {
      * @return the jwt token generator
      */
     @Bean
-    public JwtTokenGenerator jwtTokenGenerator(JwtTokenStorage jwtTokenStorage, JwtProperties jwtProperties) {
+    public JwtTokenGenerator jwtTokenGenerator(IJwtTokenStorage jwtTokenStorage, JwtProperties jwtProperties) {
         return new JwtTokenGenerator(jwtTokenStorage, jwtProperties);
     }
 
