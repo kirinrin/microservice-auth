@@ -1,4 +1,4 @@
-# 微服务权限prototype
+#### 微服务权限prototype
 
 ## 功能描述
 用于测试和验证关于资源的权限和微服务的分布式权限架构开发的prototype工程。
@@ -38,9 +38,269 @@
 
 
 
-## OAuth2
+## 示例说明
 
-### 角色
+### 资源权限用例
+
+1. 传统的用户能使用某些功能
+2. 用户只能查看某功能中的特定数据
+   1. 只能查看自己创建的数据
+   2. 只能查看某个或多个人员分组下创建的数据
+      1. 能查看某个人员分组以及人员分组下面分组的数据
+   3. 能查看所有的数据
+
+### 资源URI&API示例
+
+**URI资源**定义举例
+
+1. 所有的管理功能
+   ALL /admin/**
+
+2. 租方列表功能
+   GET /admin/projects
+
+3. 租方查询功能（查询条件）
+
+   GET /admin/projets?q={query_string}&sort={xx}&order={desc|asc}
+   eg: GET /admin/projets?q=东方+type:active+createDt>2019-01-03
+
+4. 对租方A具体信息管理功能
+   ALL /admin/projects/{001}
+
+5. 租方A的所有功能/oms/**
+   要求用户具有 001的数据访问权限
+
+**用户角色权限抽像 /users** 
+
+* 管理员admin可以看一下所有租方的相关数据和使用所有的管理功能
+
+  ```json
+  #管理功能的最高权限
+  {
+      "Statement": [
+          {
+              "Action": "admin:*",	# /admin/**
+              "Effect": "Allow",
+              "Resource": "*"
+          }
+      ],
+      "Version": "1"
+  }
+  ```
+
+* 租方A下面的用户a1只能访问自己租方下面的所有数据和所有租方功能
+
+  ```json
+  {
+      "Statement": [
+          {
+              "Action": "oms:*",	# /oms/**
+              "Effect": "Allow",
+              "Resource": "001:*"
+          }
+      ],
+      "Version": "1"
+  }
+  ```
+
+* 租方A下面的用户a2只能自己租方下面的部分功能和所有数据
+
+  ```json
+  {
+      "Statement": [
+          {
+              "Action": "oms:books:*",	# /books/**
+              "Effect": "Allow",
+              "Resource": "001:*"
+          }
+      ],
+      "Version": "1"
+  }
+  ```
+
+* 租方B下面的用户b1只能自己租方下面的部分功能和部分数据
+
+  ```json
+  {
+      "Statement": [
+          {
+              "Action": "oms:items:*",	# /oms/items/**
+              "Effect": "Allow",
+              "Resource": "002:b01"
+          }
+      ],
+      "Version": "1"
+  }
+  ```
+
+* 租方B下面的用户b2只能自己租方下面的全部功能和全部数据
+  这点是要担心的，当子数据描述增加时，针对访问全部的数据的要求，要以 * 来适配才好，不能变成需要同步的增加相应的权限这样很不方便
+
+  ```json
+  {
+      "Statement": [
+          {
+              "Action": "oms:*",	# /oms/**
+              "Effect": "Allow",
+              "Resource": "002:*"
+          }
+      ],
+      "Version": "1"
+  }
+  ```
+
+* 租方B下面的用户b3只能自己租方下面的某功和某些数据
+  这是最极端的例子，只访问部分个别的数据
+
+  ```json
+  {
+      "Statement": [
+          {
+              "Action": "oms:items:*",	# /oms/items/**
+              "Effect": "Allow",
+              "Resource": ["002:b01","002:b03"]
+          }
+      ],
+      "Version": "1"
+  }
+  ```
+
+
+
+**用户及权限说明**
+
+| user_name   | roles&authority |
+| ----------- | --------------- |
+| 用户a1      | {}              |
+| 用户a2      |                 |
+| 用户b1      |                 |
+| 用户b2      | {}              |
+| 用户b3      |                 |
+| 管理员admin |                 |
+
+**数据 项目信息 /porjects**
+
+| res_auth_id | project_name |
+| ----------- | ------------ |
+| 001         | 武汉P4项目   |
+| 002         | 上海P3项目   |
+
+**数据 /books 无租方资源特殊子数据权限** 
+
+| res_auth_id | book_name        |
+| ----------- | ---------------- |
+| 001         | 哈利波特         |
+| 001         | 绿野仙踪         |
+| 002         | 不可思议的爱丽丝 |
+
+**数据 /items 租方资源特殊子数据权限** 
+
+如果该数据资源有子数据权限要求，则增加一列用于描述子资源，同时可以使用资源描述符或标签来通配，如果该资源下面还有子资源，则需要再添加一列进行描述，命名方式以数据名 res_上一级的表_id
+
+| res_auth_id | res_item_id | item_name |
+| ----------- | ----------- | --------- |
+| 001         | a01         | 医用口罩  |
+| 002         | b01         | 3M 7501   |
+| 002         | b02         | 松重 UK2  |
+| 002         | b01         | 3M 5502   |
+| 002         | b03         | 3M 7502QL |
+
+
+
+#### Rest URI 
+
+1. get 查看
+   URL "user_search_url": "https://api.github.com/search/users?q={query}{&page,per_page,sort,order}”
+   query = key:value+key:value
+2. post 添加
+3. put 幂等修改
+4. patch 增量修改
+5. delete 删除
+
+* 针对只能查看自己创建的数据这样的需求，不建议使用权限系统来实现，使用定制独特的功能更好一点。
+
+权限定义举例
+
+```json
+#最高权限
+{
+    "Statement": [
+        {
+            "Action": "*",
+            "Effect": "Allow",
+            "Resource": "*"
+        }
+    ],
+    "Version": "1"
+}
+#系统只读
+{
+    "Version": "1",
+    "Statement": [
+        {
+            "Action": [
+                "*:Describe*",
+                "*:List*",
+                "*:Get*",
+                "*:BatchGet*",
+                "*:Query*",
+                "*:BatchQuery*",
+                "actiontrail:LookupEvents",
+                "actiontrail:Check*",
+                "dm:Desc*",
+                "dm:SenderStatistics*",
+                "ram:GenerateCredentialReport"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
+}
+#只充许操作某个资源
+{
+    "Statement": [
+        {
+            "Action": [
+                "cs:Get*"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "acs:cs:*:*:cluster/c28bc33a351db46c3bb94f0cdfadea0c6"
+            ]
+        }
+    ],
+    "Version": "1"
+}
+```
+
+
+
+**用户角色权限抽像 users**
+
+| user_name | roles&authority  |
+| --------- | ---------------- |
+| 王大      |                  |
+| 李二      | 绿野仙踪         |
+| 张三      | 不可思议的爱丽丝 |
+|           |                  |
+
+
+
+**数据 books **
+
+| res_auth_id | book_name        |
+| ----------- | ---------------- |
+| 权限A       | 哈利波特         |
+| 权限B       | 绿野仙踪         |
+| 权限C       | 不可思议的爱丽丝 |
+
+
+
+## 附录
+
+### OAuth2
+
+#### 角色
 
 先区分下OAuth 2.0 中有哪些角色,阮一峰博客里写的更精确:
 Client: 客户端,也就是Third-party application - 第三方应用程序
@@ -68,13 +328,13 @@ Resource Server：资源服务器,即服务提供商存放用户生成的资源�
 /oauth/check_token：资源服务器用来校验token
 /oauth/token_key：jwt模式下获取公钥；位于：TokenKeyEndpoint ，通过 JwtAccessTokenConverter 访问key
 
-## JWT 简介
+### JWT 简介
 
-### 规范
+#### 规范
 
 JWT – Json Web Token, 如其名，使用Json方式保存Web Token的协议。网上有各种解读，个人理解，这就是一个 客户端Session - Session保存在客户端，而不是通常的保存在服务端。
 
-### 构成
+#### 构成
 
 JWT三部分组成：
 
@@ -95,7 +355,7 @@ Signature 签名：将前两个字符串用 . 连接后，使用头部定义的�
 
 1. 
 
-### JWT令牌过期的处理方案
+#### JWT令牌过期的处理方案
 
 JWT因为是基于有实际意义的令牌的，所以可以做到网关不需要访问其它服务就能独立的进行鉴权，但是因此如果用户退出权限变化，这种先行验证的模式不能发现这些变化，解决的方案有很多。
 
@@ -103,7 +363,7 @@ JWT因为是基于有实际意义的令牌的，所以可以做到网关不需�
 2. 一种方案是把令牌过滤层加入强制过期处理的。
 3. 或者使用Redis的存储层进行存储
 
-## 附录
+
 
 ### 优点总结
 
