@@ -6,7 +6,11 @@ server:
 zuul:
   routes:
     reporter:
-      url: 'http://localhost:7071/'
+      serviceId: REPORTER
+    author:
+      serviceId: AUTHOR
+  sensitive-headers:   # 设置所有的服务都取消敏感头信息
+
 eureka:
   client:
     service‐url:

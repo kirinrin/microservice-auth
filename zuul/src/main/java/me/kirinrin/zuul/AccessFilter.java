@@ -41,6 +41,7 @@ public class AccessFilter extends ZuulFilter {
         log.info("send {} request to {}", request.getMethod(), request.getRequestURL().toString());
 
         //获取传来的参数accessToken
+        /*
         Object accessToken = request.getParameter("accessToken");
         if(accessToken == null) {
             log.warn("access token is empty");
@@ -50,8 +51,9 @@ public class AccessFilter extends ZuulFilter {
             ctx.setResponseBody("{\"result\":\"accessToken is empty!\"}");
             return null;
         }
+        */
         //如果有token，则进行路由转发
-        log.info("access token ok");
+//        log.info("access token ok");
         //这里return的值没有意义，zuul框架没有使用该返回值
         return null;
     }
