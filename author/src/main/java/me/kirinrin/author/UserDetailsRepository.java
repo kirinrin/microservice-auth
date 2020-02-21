@@ -131,8 +131,9 @@ public class UserDetailsRepository {
         SysUser sysUser = sysUserService.queryByUsername(username);
 
         if (Objects.nonNull(sysUser)) {
+
             return User.withUsername(username).password(sysUser.getEncodePassword())
-                    .authorities(AuthorityUtils.createAuthorityList("ROLE_ADMIN", "ROLE_APP"))
+                    .authorities(AuthorityUtils.createAuthorityList(sysUser.getPermissions()))
                     .build();
         }
         throw new UsernameNotFoundException("username: " + username + " notfound");

@@ -6,6 +6,7 @@ server:
 zuul:
   routes:
     reporter:
+      path: /
       serviceId: REPORTER
     author:
       serviceId: AUTHOR
