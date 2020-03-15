@@ -3,7 +3,11 @@ package me.kirinrin.reporter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 /**
  * @author Kirinrin
  */
@@ -16,7 +20,10 @@ public class ReporterApplication {
     }
 
     @GetMapping("reports")
-    public String reports(){
-        return "{report}";
+    public String reports(@RequestHeader(value="tenant_id", defaultValue = "0") String tenantId){
+        String user = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest()
+                .getHeader("tenant_id");
+        System.out.println(user);
+        return "tenantId header = " + tenantId;
     }
 }
