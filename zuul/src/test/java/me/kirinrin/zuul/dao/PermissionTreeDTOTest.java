@@ -15,17 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @Date 2020/3/15 6:05 下午
  * @Created by Kirinrin
  */
-class PermissionTreeDTOTest {
+class PermissionMatchDTOTest {
 
-
-    @Test
-    void buildUriTree() {
-        List<PermissionDTO> data = getSomeTestData();
-        Map<String, PermissionTreeDTO> tree = PermissionTreeDTO.buildUriTree(data);
-        assertFalse(tree.isEmpty());
-        assertTrue(tree.containsKey("qc"));
-        assertEquals(tree.keySet().size(), 1);
-    }
 
     private List<PermissionDTO> getSomeTestData() {
         List<PermissionDTO> data = new ArrayList<>();
@@ -43,6 +34,20 @@ class PermissionTreeDTOTest {
         return data;
     }
 
+    @Test
+    void testBuildUriMatchList(){
+        List<PermissionMatchDTO> list = PermissionMatchDTO.buildUriMatchList(getSomeTestData());
+        assertEquals(4, list.size());
+    }
+
+    @Test
+    void testFindUri(){
+        List<PermissionMatchDTO> list = PermissionMatchDTO.buildUriMatchList(getSomeTestData());
+        PermissionMatchDTO match = PermissionMatchDTO.findMatchUri(list, "get@qc/data-set/item/134148334334442499x/view-file");
+        assertNotNull(match);
+        assertEquals(match.getUriMatchRe(), "get@qc/data-set/item/[A-Za-z0-9_]+/view-file");
+        assertEquals(match.getPermission().getId(), "cas:dataset:DescribeItemInstanceRecording");
+    }
 
     /**
      *  确定分割的方案
@@ -80,28 +85,18 @@ class PermissionTreeDTOTest {
 
     }
 
-    @Test
-    void splitUri2QueueTest(){
-        String uri = "/sdfasdfa/bbbb/xxxxx/";
-
-        Queue<String> queue = PermissionTreeDTO.splitUri2Queue("/dataset/flow/xxxxxss/");
-        assertEquals(3, queue.size());
-
-        queue = PermissionTreeDTO.splitUri2Queue("/");
-        assertEquals(0, queue.size());
-
-
-    }
-
     /**
      * get@qc/data-set/item/134-148-3-34334442499x/view-file
      * 这样的查找到树中的 get@qc/data-set/item/{id}/view-file
      */
     @Test
-    void findMatchUriTest() {
-        Map<String, PermissionTreeDTO> tree = PermissionTreeDTO.buildUriTree(getSomeTestData());
+    void matchReTest() {
 
         String re = "get@qc/data-set/item/[A-Za-z0-9]+/view-file";
+
+        boolean x = Pattern.matches(re, "get@qc/data-set/item/134148334334442499x/view-file");
+        assertTrue(x);
+
         Pattern p= Pattern.compile(re);
 
         Matcher matcher = p.matcher("get@qc/data-set/item/134148334334442499x/view-file");
