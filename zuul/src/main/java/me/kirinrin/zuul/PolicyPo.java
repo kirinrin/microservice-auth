@@ -1,6 +1,8 @@
 package me.kirinrin.zuul;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Classname PolicyPo
@@ -9,6 +11,8 @@ import lombok.Data;
  * @Created by Kirinrin
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PolicyPo {
     private String action;
     private String effect;

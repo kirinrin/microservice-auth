@@ -34,20 +34,6 @@ class PermissionMatchDTOTest {
         return data;
     }
 
-    @Test
-    void testBuildUriMatchList(){
-        List<PermissionMatchDTO> list = PermissionMatchDTO.buildUriMatchList(getSomeTestData());
-        assertEquals(4, list.size());
-    }
-
-    @Test
-    void testFindUri(){
-        List<PermissionMatchDTO> list = PermissionMatchDTO.buildUriMatchList(getSomeTestData());
-        PermissionMatchDTO match = PermissionMatchDTO.findMatchUri(list, "get@qc/data-set/item/134148334334442499x/view-file");
-        assertNotNull(match);
-        assertEquals(match.getUriMatchRe(), "get@qc/data-set/item/[A-Za-z0-9_]+/view-file");
-        assertEquals(match.getPermission().getId(), "cas:dataset:DescribeItemInstanceRecording");
-    }
 
     /**
      *  确定分割的方案

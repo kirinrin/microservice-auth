@@ -3,10 +3,9 @@ package me.kirinrin.zuul;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,11 +23,6 @@ public class RedisTest {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    @Test
-    public void test() throws Exception {
-        stringRedisTemplate.opsForValue().set("aaa", "111");
-        assertEquals("111", stringRedisTemplate.opsForValue().get("aaa"));
-    }
 
     /**
      * 测试 K-V的键值对
@@ -44,30 +38,18 @@ public class RedisTest {
 
     }
 
-    private UserPo genTestUser(){
-        return new UserPo("user-name","psaa", "aa@126.com");
-    }
-
-    /**
-     * 测试读写一个类
-     * 测试给类设置过期时间
-     * @throws Exception
-     */
-    @Test
-    public void testObj() throws Exception {
-        UserPo user = genTestUser();
-        ValueOperations<String, UserPo> operations=redisTemplate.opsForValue();
-        operations.set(user.getEmail(), user,1, TimeUnit.SECONDS);
-        assertEquals(user.getPassword(), operations.get(user.getEmail()).getPassword());
-        Thread.sleep(1000);
-        //redisTemplate.delete("com.neo.f");
-        boolean exists=redisTemplate.hasKey(user.getEmail());
-
-        assertTrue(! exists);
-    }
-
     @Autowired
     TokenAuthorityService service;
 
+    @Test
+    void testRedabound(){
+//        BoundSetOperations bound = redisTemplate.boundSetOps("access_token");
+//        bound.members().forEach(v -> System.out.println("添加新值后查看所有的值:" + v));
+
+        String token = "access_token:jiangkun:XwwFDQMOTF8XVFdZUh4FAg8MHAkFAFtEVQoCUhZbXFINC1JQ";
+        Set<String> set =  stringRedisTemplate.keys("access_token:jiangkun:*");
+        set.forEach(key -> System.out.println("key = " + key));
+        System.out.println("----------------****----------- " + set.size());
+    }
 
 }

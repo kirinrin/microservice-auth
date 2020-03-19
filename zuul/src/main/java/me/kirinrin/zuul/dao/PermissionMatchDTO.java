@@ -34,16 +34,6 @@ public class PermissionMatchDTO {
     private String uriMatchRe;
     private PermissionDTO permission;
 
-    /**
-     *
-     * ref@ 的忽略不处理
-     * @param permissionList  get@qc/data-set/item/{id}/view-file
-     * @return
-     */
-    public static List<PermissionMatchDTO> buildUriMatchList(List<PermissionDTO> permissionList){
-        return permissionList.stream().filter(item-> !item.getUri().startsWith("ref@")).map(item -> new PermissionMatchDTO(item.getUri().replaceAll("\\{[A-Za-z0-9_]+\\}", "[A-Za-z0-9_]+"), item)).collect(Collectors.toList());
-    }
-
 
     /**
      * 查询PermissionTree结构，找到与用户实际调用的URI匹配的ID

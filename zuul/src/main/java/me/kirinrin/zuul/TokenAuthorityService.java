@@ -1,12 +1,21 @@
 package me.kirinrin.zuul;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import me.kirinrin.zuul.dao.PermissionMatchDTO;
+import me.kirinrin.zuul.dao.PermissionSetDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * @Classname TokenService
@@ -21,43 +30,101 @@ public class TokenAuthorityService {
     StringRedisTemplate stringRedisTemplate;
     @Autowired
     RedisTemplate redisTemplate;
-    public String getTokenData(String tokenString) {
-        return "";
+
+    static List<PermissionSetDTO> uriReList = null;
+
+    public List<PermissionSetDTO>  getUriReList (){
+        if(uriReList == null){
+            log.info("初始化uriReList");
+            List<PermissionSetDTO> permissionList = new ArrayList<>();
+            Set<String> keys = stringRedisTemplate.keys("security:permission-map:*");
+            for (String key : keys) {
+                log.info("security:permission-map* = {}", key);
+                Set<String> sets = stringRedisTemplate.boundSetOps(key).members();
+                PermissionSetDTO p = new PermissionSetDTO();
+                p.setKey(key);
+                p.setValueIds(sets);
+                p.setUri(key.substring(24));
+                p.setUriRe(p.getUri().replaceAll("\\{[A-Za-z0-9_]+\\}", "[A-Za-z0-9_@\\.]+"));
+                permissionList.add(p);
+            }
+            uriReList = permissionList;
+        }
+        return uriReList;
+    }
+
+    /**
+     * 从Redis中获取token
+     * @param tokenString
+     * @return
+     */
+    public JSONObject getTokenData(String tokenString) {
+        String key = String.format("security:access_token:%s", tokenString);
+        Set<String>keys = stringRedisTemplate.keys(key);
+        if(keys.isEmpty()){
+            log.debug("查询 token 无法查到");
+            return null;
+        }else{
+            String data = null;
+            for (String k : keys) {
+                data = stringRedisTemplate.boundValueOps(k).get();
+                stringRedisTemplate.boundValueOps(k).expire(72, TimeUnit.HOURS);
+            }
+            if(data == null){
+                log.warn("查询 token 但无对应的值 = {}",tokenString);
+            }
+            log.debug("查询 token = {} data = {}",tokenString,  data);
+            JSONObject jsonObject = JSONUtil.parseObj(data);
+            return jsonObject;
+        }
+
+    }
+
+    private PermissionSetDTO findMatchUri(String uri){
+        log.info("尝试匹配URI 到模版 {}", uri);
+        for (PermissionSetDTO reData : getUriReList()) {
+            log.debug("尝试匹配URI到模版 {} - {}", uri, reData);
+            if (Pattern.matches(reData.getUriRe(), uri)){
+                log.debug("匹配URI到模版");
+                return reData;
+            }
+        }
+
+        return null;
     }
 
     /**
      * 验证是否有访问该URI的权限
      * 参考现在的分段方案一般是有3段，要兼容 * ｜ cas:* | cas:*:Describe*
      * 以及allow deny两种条件
-     * @param token
+     * @param tokenData
      * @param uri
      */
-    public boolean validAuthoriy(String token, String uri){
-        List<PolicyPo> policys = findUserPolicy(token);
-        String permissionKey = findPermissionKey(uri);
+    public boolean validAuthoriy(JSONObject tokenData, String uri) {
 
-        //TODO 检察key是否满足policy的描述
-        // 将 policy 与 permissionKey 逐条对比
-        // 先计算 deny 再 allow
-        String[] permissionFragments = permissionKey.split(":");
-        for(PolicyPo policy : policys){
-            if ("deny".equals( policy.getEffect())){
-                String[] policyFragments = policy.getAction().split(":");
-                if (isMatch(policyFragments, permissionFragments )){
-                    return false;
+
+        JSONArray actions = tokenData.getJSONArray("actions");
+
+        PermissionSetDTO matchUriData = findMatchUri(uri);
+        log.debug("匹配Url 定义 {} - {}", uri, matchUriData);
+
+        if (matchUriData == null) {
+            log.info("无此Url权限定义 {}", uri);
+            return false;
+        } else {
+            for (String actionId : matchUriData.getValueIds()) {
+                log.debug("匹配用户权限是否有 {}", actionId);
+                for (String action : actions.toList(String.class)) {
+                    if (match(action, actionId)) {
+                        log.debug("匹配用户权限 OK");
+                        return true;
+                    }
                 }
             }
-        }
-        for(PolicyPo policy : policys){
-            if ("allow".equals( policy.getEffect())){
-                String[] policyFragments = policy.getAction().split(":");
-                if (isMatch(policyFragments, permissionFragments)){
-                    return true;
-                }
-            }
+            log.debug("匹配用户权限，用户无权访问 uri = {}, id = {} actions = {}", uri, matchUriData.getValueIds(), actions);
+            return false;
         }
 
-        return false;
     }
 
     /**
@@ -93,9 +160,14 @@ public class TokenAuthorityService {
         // 返回 CreateFileInstance 这样的值
         return null;
     }
-    private List<PolicyPo> findUserPolicy(String token){
-        //TODO 找到用户的权限描述语句
-        return null;
+    private List<PolicyPo> findUserPolicy(JSONObject tokenData){
+        List<PolicyPo> policyList = new ArrayList<PolicyPo>();
+        JSONArray array = tokenData.getJSONArray("actions");
+        for (Object o : array) {
+            String action = (String) o;
+            policyList.add(new PolicyPo(action, "allow", "*"));
+        }
+        return policyList;
     }
 
     /**
@@ -185,4 +257,5 @@ public class TokenAuthorityService {
         }
         return result;
     }
+
 }

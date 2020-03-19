@@ -7,14 +7,17 @@ import java.io.Serializable;
 
 /**
  * @Classname User
- * @Description 用于测试缓存类对像的
+ * @Description 用于封装从redis中读取的token 用户对像
  * @Date 2020/3/12 2:11 下午
  * @Created by Kirinrin
  */
 @Data
 @AllArgsConstructor
 public class UserPo implements Serializable {
-    private String name;
-    private String password;
-    private String email;
+    private String key;
+    private String token;
+    private String userName;
+    private String displayName;
+    private String[] actions;
+    private String tenantId;
 }

@@ -1,8 +1,14 @@
 package me.kirinrin.zuul;
 
+import cn.hutool.json.JSONObject;
+import com.google.gson.JsonObject;
+import me.kirinrin.zuul.dao.PermissionMatchDTO;
+import me.kirinrin.zuul.dao.PermissionSetDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,16 +18,38 @@ import static org.junit.jupiter.api.Assertions.*;
  * @Date 2020/3/12 3:59 下午
  * @Created by Kirinrin
  */
+@SpringBootTest
 class TokenAuthorityServiceTest {
 
     @Autowired TokenAuthorityService service = new TokenAuthorityService();
 
     @Test
     void getTokenData() {
+//        security:access_token:xiapengtao:GlFQSFUPAkFMCQ4HVxUAVwMLHwkACVoaTwtWEVwKUBIEVwwH
+
+        JSONObject data = service.getTokenData("xiapengtao:SVxQE1dWVENMVwwBBRUACgIDHgAGBVIYSl4EQwZXUU0CCVgA");
+        assertNotNull(data);
+        System.out.println(data);
+        assertEquals("suplus", data.get("tenantId"));
+        System.out.println(data.get("tenantId"));
+    }
+    @Test
+    void testGetUriReList(){
+        List<PermissionSetDTO> result = service.getUriReList();
+        assertFalse(result.isEmpty());
+        result.forEach( v -> System.out.println(v));
     }
 
     @Test
     void validAuthoriy() {
+        String token = "Tw8CFAYNX0RMVg0AUxUABwdeHgkEAFYfTllWFFdXA0VTDA8F";
+        String uri = "get@qc/auto-qc-job/342948712947297/export-result-detail";
+        boolean can = service.validAuthoriy(service.getTokenData(token), uri);
+        assertTrue(can);
+
+         uri = "get@qc/auto-qc-job/342948712947297/export-result-detail/showData";
+        can = service.validAuthoriy(service.getTokenData(token), uri);
+        assertFalse(can);
     }
 
     @Test
