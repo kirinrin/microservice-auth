@@ -1,8 +1,11 @@
 spring:
-  profiles:
-    active: test
   application:
     name: zuul
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    database: ${REDIS_DATABASE:10}
+    password: ${REDIS_PASSWORD:suplus#1234}
 server:
   port: 7070
 zuul:
@@ -32,7 +35,7 @@ zuul:
 eureka:
   client:
     service‐url:
-      defaultZone: http://localhost:7079/eureka
+      defaultZone: ${DISCOVERY_URL:http://localhost:7079/eureka}
   instance:
     prefer‐ip‐address: true  #访问路径可以显示ip地址
     instance-id: USER-SERVICE   #自定义服务名称
@@ -45,4 +48,7 @@ management:
     port: 7080
 logging:
   level:
-    me: debug
+    me: info
+  file:
+    name: zuul.log
+    max-history: 100

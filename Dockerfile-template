@@ -1,0 +1,8 @@
+FROM registry.cn-beijing.aliyuncs.com/suplus_main/openjdk:8
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+VOLUME /tmp
+WORKDIR  /app
+COPY app .
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-jar", "/app/app.jar"]
+EXPOSE 8800
+
