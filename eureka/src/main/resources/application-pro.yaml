@@ -1,3 +1,0 @@
-server:
-  port: ${discovery-port}  #注册中心的地址
-
