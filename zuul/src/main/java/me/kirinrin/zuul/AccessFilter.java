@@ -100,7 +100,7 @@ public class AccessFilter extends ZuulFilter {
         }
 
         String method = request.getMethod().toLowerCase();
-        if(!service.validAuthoriy(tokenData, method + "@"+requestURI.substring(1))){
+        if( !isUruleRequest(requestURI) && !service.validAuthoriy(tokenData, method + "@"+requestURI.substring(1))){
             log.warn("access token is invalid can access URI {}", requestURI);
             //过滤该请求，不往下级服务去转发请求，到此结束
             ctx.setSendZuulResponse(false);
@@ -118,6 +118,9 @@ public class AccessFilter extends ZuulFilter {
         return null;
     }
 
+    private boolean isUruleRequest(String uri) {
+        return uri.startsWith("/urule/");
+    }
 
 
 }

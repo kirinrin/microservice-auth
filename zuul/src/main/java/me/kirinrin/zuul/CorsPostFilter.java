@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Component
 @Slf4j
-public class CorePostFilter extends ZuulFilter {
+public class CorsPostFilter extends ZuulFilter {
     @Override
     public String filterType() {
         /*
@@ -41,7 +41,7 @@ public class CorePostFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
         //过滤各种POST请求
-        if(request.getMethod().equals(RequestMethod.OPTIONS.name())){
+        if(request.getMethod().equals(RequestMethod.OPTIONS.name()) && !request.getHeader("Origin").isEmpty()){
             return false;
         }
         log.debug("执行后置CORE过滤器");
@@ -57,10 +57,9 @@ public class CorePostFilter extends ZuulFilter {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Credentials","true");
         response.setHeader("Access-Control-Expose-Headers","X-forwared-port, X-forwarded-host");
-        response.setHeader("Vary","Origin,Access-Control-Request-Method,Access-Control-Request-Headers");
         //允许继续路由
         ctx.setSendZuulResponse(true);
-        ctx.setResponseStatusCode(200);
+//        ctx.setResponseStatusCode(200);
         log.debug("*****************PostFilter run end*****************");
         return null;
     }

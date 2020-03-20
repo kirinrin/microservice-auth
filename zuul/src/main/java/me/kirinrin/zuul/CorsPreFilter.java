@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Component
 @Slf4j
-public class CorePreFilter extends ZuulFilter {
+public class CorsPreFilter extends ZuulFilter {
     @Override
     public String filterType() {
         //前置过滤器
@@ -58,7 +58,6 @@ public class CorePreFilter extends ZuulFilter {
         response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
         response.setHeader("Access-Control-Allow-Methods","POST,GET,PUT,DELETE,PATCH");
         response.setHeader("Access-Control-Expose-Headers","X-forwared-port, X-forwarded-host");
-        response.setHeader("Vary","Origin,Access-Control-Request-Method,Access-Control-Request-Headers");
         //不再路由
         ctx.setSendZuulResponse(false);
         ctx.setResponseStatusCode(200);

@@ -30,8 +30,26 @@ zuul:
       serviceId: qc-service
     urule:
       strip-prefix: false
-  ws:
-    
+      path: /urule/**
+      serviceId: URULE-CONSOLE-SERVICE
+    word-cloud:
+      path: /word-cloud/**
+      serviceId: word-cloud
+  host:
+    connect-timeout-millis: 600000
+    socket-timeout-millis: 600000
+ribbon:
+  ReadTimeout: 600000
+  SocketTimeout: 600000
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 60000
+
 eureka:
   client:
     service‐url:
