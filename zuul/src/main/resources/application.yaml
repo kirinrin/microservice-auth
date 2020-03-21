@@ -38,9 +38,16 @@ zuul:
     word-cloud:
       path: /word-cloud/**
       url: http://localhost:9080/
+    reporter:
+      path: /reporter/**
+      serviceId: reporter
   host:
     connect-timeout-millis: 600000
     socket-timeout-millis: 600000
+  sensitive-headers:
+    - Origin
+    - Access-Control-Request-Method
+    - Access-Control-Request-Headers
 ribbon:
   ReadTimeout: 600000
   SocketTimeout: 600000

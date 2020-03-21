@@ -63,6 +63,9 @@ public class AccessFilter extends ZuulFilter {
                 return true;
             }
         }
+        if(uri.startsWith("/reporter")){
+            return true;
+        }
         return false;
     }
 

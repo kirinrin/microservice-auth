@@ -1,7 +1,9 @@
 package me.kirinrin.reporter;
 
+import com.netflix.client.http.HttpRequest;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,4 +46,13 @@ public class ReporterApplication {
         return "logout tenantId header = " + tenantId;
     }
 
+    @GetMapping("header")
+    public String header(@RequestHeader HttpHeaders headers) {
+        headers.forEach( (s, b)-> {
+            System.out.println("header = " + s);
+            b.forEach( v -> System.out.print("\t" + v));
+
+        });
+       return "header";
+    }
 }

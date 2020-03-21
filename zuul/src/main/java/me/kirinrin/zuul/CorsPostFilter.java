@@ -1,5 +1,6 @@
 package me.kirinrin.zuul;
 
+import com.netflix.util.Pair;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @Classname CorePostFilter
@@ -34,12 +36,23 @@ public class CorsPostFilter extends ZuulFilter {
     @Override
     public int filterOrder() {
         //// 优先级为0，数字越大，优先级越低
-        return 999;
+        return 3;
     }
     @Override
     public boolean shouldFilter() {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
+        HttpServletResponse response = ctx.getResponse();
+        List<Pair<String, String>> headers = ctx.getZuulResponseHeaders();
+        List<Pair<String, String>> originHeaders = ctx.getOriginResponseHeaders();
+        log.debug("show all header....");
+        response.getHeaderNames().forEach( n -> log.debug("Header {}", n));
+        log.debug("zuul header");
+        headers.forEach((n) -> log.debug("zuul header: {} - {}", n.first(), n.second()));
+        log.debug("zuul origin header");
+        originHeaders.forEach((n) -> log.debug("zuul origin header: {} - {}", n.first(), n.second()));
+        log.debug("end all header....");
+        originHeaders.remove(3);
         //过滤各种POST请求
         if(request.getMethod().equals(RequestMethod.OPTIONS.name()) && !request.getHeader("Origin").isEmpty()){
             return false;
@@ -56,16 +69,12 @@ public class CorsPostFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletResponse response = ctx.getResponse();
         HttpServletRequest request = ctx.getRequest();
-//        log.debug("后置过滤器 Access-Control-Allow-Origin = {}", response.getHeader(Access_Control_Allow_Origin));
-//        response.setHeader(Access_Control_Allow_Origin, "*");
-//        response.setHeader("Access-Control-Allow-Credentials","true");
+        response.setHeader(Access_Control_Allow_Origin, "*");
+        response.setHeader("Access-Control-Allow-Credentials","true");
         response.setHeader("Access-Control-Expose-Headers","X-forwared-port, X-forwarded-host");
         //允许继续路由
         ctx.setSendZuulResponse(true);
-//        ctx.setResponseStatusCode(200);
-        response.getHeaders(Access_Control_Allow_Origin).forEach( h -> log.debug("后置过滤器 Access-Control-Allow-Origin = {}", h));
 
-        log.debug("*****************PostFilter run end*****************");
         return null;
     }
 }
