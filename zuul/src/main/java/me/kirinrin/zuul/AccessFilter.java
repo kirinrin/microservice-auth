@@ -4,8 +4,6 @@ import cn.hutool.json.JSONObject;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -100,7 +98,7 @@ public class AccessFilter extends ZuulFilter {
         }
 
         String method = request.getMethod().toLowerCase();
-        if( !isUruleRequest(requestURI) && !service.validAuthoriy(tokenData, method + "@"+requestURI.substring(1))){
+        if( !is3partRequest(requestURI) && !service.validAuthoriy(tokenData, method + "@"+requestURI.substring(1))){
             log.warn("access token is invalid can access URI {}", requestURI);
             //过滤该请求，不往下级服务去转发请求，到此结束
             ctx.setSendZuulResponse(false);
@@ -118,8 +116,12 @@ public class AccessFilter extends ZuulFilter {
         return null;
     }
 
-    private boolean isUruleRequest(String uri) {
-        return uri.startsWith("/urule/");
+    private boolean is3partRequest(String uri) {
+        if(uri.startsWith("/urule") || uri.startsWith("/word-cloud")){
+            return true;
+        }else {
+            return false;
+        }
     }
 
 

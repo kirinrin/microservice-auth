@@ -34,7 +34,7 @@ zuul:
       serviceId: URULE-CONSOLE-SERVICE
     word-cloud:
       path: /word-cloud/**
-      serviceId: word-cloud
+      url: http://localhost:9080/
   host:
     connect-timeout-millis: 600000
     socket-timeout-millis: 600000
