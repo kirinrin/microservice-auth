@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Classname CorePostFilter
@@ -36,33 +38,45 @@ public class CorsPostFilter extends ZuulFilter {
     @Override
     public int filterOrder() {
         //// 优先级为0，数字越大，优先级越低
-        return 3;
+        return 4;
     }
     @Override
     public boolean shouldFilter() {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
-        HttpServletResponse response = ctx.getResponse();
-        List<Pair<String, String>> headers = ctx.getZuulResponseHeaders();
-        List<Pair<String, String>> originHeaders = ctx.getOriginResponseHeaders();
-        log.debug("show all header....");
-        response.getHeaderNames().forEach( n -> log.debug("Header {}", n));
-        log.debug("zuul header");
-        headers.forEach((n) -> log.debug("zuul header: {} - {}", n.first(), n.second()));
-        log.debug("zuul origin header");
-        originHeaders.forEach((n) -> log.debug("zuul origin header: {} - {}", n.first(), n.second()));
-        log.debug("end all header....");
-        originHeaders.remove(3);
+        printHeaderInfo(ctx, request);
         //过滤各种POST请求
-        if(request.getMethod().equals(RequestMethod.OPTIONS.name()) && !request.getHeader("Origin").isEmpty()){
+        if(request.getMethod().equals(RequestMethod.OPTIONS.name()) && !request.getHeader(Origin).isEmpty()){
+            log.debug("忽略后置CORE过滤器");
             return false;
         }
         log.debug("执行后置CORE过滤器");
         return true;
     }
 
-    static final String Access_Control_Allow_Origin = "Access-Control-Allow-Origin";
+    private void printHeaderInfo(RequestContext ctx, HttpServletRequest request) {
+        HttpServletResponse response = ctx.getResponse();
+        List<Pair<String, String>> headers = ctx.getZuulResponseHeaders();
+        List<Pair<String, String>> originHeaders = ctx.getOriginResponseHeaders();
+        String origin = request.getHeader(Origin);
+        log.debug("Origin value = {}", origin);
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()){
+            String key = headerNames.nextElement();
+            log.debug("request header {} - {}", key, request.getHeader(key));
+        }
+        Map<String, String> zuulRequestHeader = ctx.getZuulRequestHeaders();
+        zuulRequestHeader.forEach((k, v)->log.debug("zuulRequestHeader k = {}, v = {}", k,v));
+        response.getHeaderNames().forEach( n -> log.debug("response Header {}", n));
+        log.debug("zuul header");
+        headers.forEach((n) -> log.debug("zuul response header: {} - {}", n.first(), n.second()));
+        log.debug("zuul origin header");
+        originHeaders.forEach((n) -> log.debug("origin response header: {} - {}", n.first(), n.second()));
+        log.debug("end all header....");
+    }
 
+    static final String Access_Control_Allow_Origin = "Access-Control-Allow-Origin";
+    static final String Origin = "Origin";
     @Override
     public Object run() {
 
@@ -71,7 +85,7 @@ public class CorsPostFilter extends ZuulFilter {
         ctx.getOriginResponseHeaders();
         List<Pair<String, String>> originHeaders = ctx.getOriginResponseHeaders();
         for (Pair<String, String> header : originHeaders) {
-            if (header.first().equalsIgnoreCase("Access_Control_Allow_Origin")){
+            if (header.first().equalsIgnoreCase(Access_Control_Allow_Origin)){
                 log.debug("下游服务返回了CORS头 Access_Control_Allow_Origin = {}", header.second());
                 ctx.setSendZuulResponse(true);
                 return null;
