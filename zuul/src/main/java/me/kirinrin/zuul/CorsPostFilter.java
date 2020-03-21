@@ -68,7 +68,16 @@ public class CorsPostFilter extends ZuulFilter {
 
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletResponse response = ctx.getResponse();
-        HttpServletRequest request = ctx.getRequest();
+        ctx.getOriginResponseHeaders();
+        List<Pair<String, String>> originHeaders = ctx.getOriginResponseHeaders();
+        for (Pair<String, String> header : originHeaders) {
+            if (header.first().equalsIgnoreCase("Access_Control_Allow_Origin")){
+                log.debug("下游服务返回了CORS头 Access_Control_Allow_Origin = {}", header.second());
+                ctx.setSendZuulResponse(true);
+                return null;
+            }
+        }
+        log.debug("下游服务无CORS头, 添回");
         response.setHeader(Access_Control_Allow_Origin, "*");
         response.setHeader("Access-Control-Allow-Credentials","true");
         response.setHeader("Access-Control-Expose-Headers","X-forwared-port, X-forwarded-host");

@@ -44,10 +44,6 @@ zuul:
   host:
     connect-timeout-millis: 600000
     socket-timeout-millis: 600000
-  sensitive-headers:
-    - Origin
-    - Access-Control-Request-Method
-    - Access-Control-Request-Headers
 ribbon:
   ReadTimeout: 600000
   SocketTimeout: 600000
