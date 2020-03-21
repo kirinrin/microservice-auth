@@ -69,7 +69,7 @@ management:
     port: 7080
 logging:
   level:
-    me: info
+    me: debug
   file:
     name: zuul.log
     max-history: 100
