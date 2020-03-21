@@ -23,14 +23,13 @@ import java.util.TimeZone;
 public class ZuulApplication {
 
     public static void main(String[] args) {
-        log.info("设置系统时区UTC+8 {}", new Date());
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
         SpringApplication.run(ZuulApplication.class, args);
     }
 
     @PostConstruct
     void setDefaultTimezone() {
-        log.info("设置系统时区UTC+8 {}", new Date());
+        log.info("设置系统时区 时间： {}", new Date());
+        log.info("默认时区：{}", TimeZone.getDefault());
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 }
