@@ -134,7 +134,7 @@ public class AccessFilter extends ZuulFilter {
     }
 
     private boolean is3partRequest(String uri) {
-        if(uri.startsWith("/urule") || uri.startsWith("/word-cloud")){
+        if(uri.startsWith("/urule")){
             return true;
         }else {
             return false;
