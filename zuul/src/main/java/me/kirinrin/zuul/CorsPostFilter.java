@@ -46,7 +46,7 @@ public class CorsPostFilter extends ZuulFilter {
         HttpServletRequest request = ctx.getRequest();
         printHeaderInfo(ctx, request);
         //过滤各种POST请求
-        if(request.getMethod().equals(RequestMethod.OPTIONS.name()) && !request.getHeader(Origin).isEmpty()){
+        if(request.getMethod().equals(RequestMethod.OPTIONS.name()) || request.getHeader(ORIGIN) == null){
             log.debug("忽略后置CORE过滤器");
             return false;
         }
@@ -58,7 +58,7 @@ public class CorsPostFilter extends ZuulFilter {
         HttpServletResponse response = ctx.getResponse();
         List<Pair<String, String>> headers = ctx.getZuulResponseHeaders();
         List<Pair<String, String>> originHeaders = ctx.getOriginResponseHeaders();
-        String origin = request.getHeader(Origin);
+        String origin = request.getHeader(ORIGIN);
         log.debug("Origin value = {}", origin);
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()){
@@ -76,7 +76,7 @@ public class CorsPostFilter extends ZuulFilter {
     }
 
     static final String Access_Control_Allow_Origin = "Access-Control-Allow-Origin";
-    static final String Origin = "Origin";
+    static final String ORIGIN = "Origin";
     @Override
     public Object run() {
 
@@ -91,7 +91,7 @@ public class CorsPostFilter extends ZuulFilter {
                 return null;
             }
         }
-        log.debug("下游服务无CORS头, 添回");
+        log.debug("下游服务无CORS头, 添加");
         response.setHeader(Access_Control_Allow_Origin, "*");
         response.setHeader("Access-Control-Allow-Credentials","true");
         response.setHeader("Access-Control-Expose-Headers","X-forwared-port, X-forwarded-host");

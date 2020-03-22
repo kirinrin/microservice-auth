@@ -55,4 +55,15 @@ public class ReporterApplication {
         });
        return "header";
     }
+    @GetMapping("timeout")
+    public String timeout(@RequestHeader HttpHeaders headers) {
+        try {
+            System.out.println("线程等待");
+            Thread.sleep(1000*60*3);
+        } catch (InterruptedException e) {
+            System.out.println("线程打断");
+            e.printStackTrace();
+        }
+        return "timeout";
+    }
 }
