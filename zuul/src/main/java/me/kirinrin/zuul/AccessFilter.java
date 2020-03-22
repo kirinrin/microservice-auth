@@ -5,6 +5,7 @@ import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -53,6 +54,10 @@ public class AccessFilter extends ZuulFilter {
             //登录接口不需要校验
             return false;
         }
+        if(request.getMethod().equals(RequestMethod.OPTIONS.name())){
+            log.debug("OPTION请求，跳过");
+            return false;
+        }
         return !isStaticResource(request.getRequestURI());
     }
 
@@ -71,6 +76,7 @@ public class AccessFilter extends ZuulFilter {
 
     @Override
     public Object run() {
+        log.debug("*****************AccessFilter run start*****************");
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
         String requestURI = request.getRequestURI();
@@ -86,6 +92,7 @@ public class AccessFilter extends ZuulFilter {
             ctx.setSendZuulResponse(false);
             ctx.setResponseStatusCode(401);
             ctx.setResponseBody("{\"result\":\"accessToken is empty!\"}");
+            log.debug("*****************AccessFilter run end*****************");
             return null;
         }
 
@@ -97,6 +104,7 @@ public class AccessFilter extends ZuulFilter {
             ctx.setSendZuulResponse(false);
             ctx.setResponseStatusCode(403);
             ctx.setResponseBody("{\"result\":\"accessToken is invalid!\"}");
+            log.debug("*****************AccessFilter run end*****************");
             return null;
         }
 
@@ -107,6 +115,7 @@ public class AccessFilter extends ZuulFilter {
             ctx.setSendZuulResponse(false);
             ctx.setResponseStatusCode(403);
             ctx.setResponseBody("{\"result\":\"Permission denied\"}");
+            log.debug("*****************AccessFilter run end*****************");
             return null;
         }
 
@@ -116,6 +125,7 @@ public class AccessFilter extends ZuulFilter {
 
 
         log.info("网关接收请求验证通过 {} URL {}", request.getMethod(), requestURI);
+        log.debug("*****************AccessFilter run end*****************");
         return null;
     }
 

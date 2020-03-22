@@ -79,7 +79,7 @@ public class CorsPostFilter extends ZuulFilter {
     static final String ORIGIN = "Origin";
     @Override
     public Object run() {
-
+        log.debug("*****************CorsPostFilter run start*****************");
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletResponse response = ctx.getResponse();
         ctx.getOriginResponseHeaders();
@@ -88,6 +88,7 @@ public class CorsPostFilter extends ZuulFilter {
             if (header.first().equalsIgnoreCase(Access_Control_Allow_Origin)){
                 log.debug("下游服务返回了CORS头 Access_Control_Allow_Origin = {}", header.second());
                 ctx.setSendZuulResponse(true);
+                log.debug("*****************CorsPostFilter run end*****************");
                 return null;
             }
         }
@@ -97,7 +98,7 @@ public class CorsPostFilter extends ZuulFilter {
         response.setHeader("Access-Control-Expose-Headers","X-forwared-port, X-forwarded-host");
         //允许继续路由
         ctx.setSendZuulResponse(true);
-
+        log.debug("*****************CorsPostFilter run end*****************");
         return null;
     }
 }

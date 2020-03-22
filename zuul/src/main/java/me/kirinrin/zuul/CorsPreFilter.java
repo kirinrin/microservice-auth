@@ -44,7 +44,7 @@ public class CorsPreFilter extends ZuulFilter {
 
     @Override
     public Object run() {
-        log.debug("*****************FirstFilter run start*****************");
+        log.debug("*****************CorsPreFilter run start*****************");
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletResponse response = ctx.getResponse();
         HttpServletRequest request = ctx.getRequest();
@@ -61,7 +61,7 @@ public class CorsPreFilter extends ZuulFilter {
         //不再路由
         ctx.setSendZuulResponse(false);
         ctx.setResponseStatusCode(200);
-        log.debug("*****************FirstFilter run end*****************");
+        log.debug("*****************CorsPreFilter run end*****************");
         return null;
     }
 }
