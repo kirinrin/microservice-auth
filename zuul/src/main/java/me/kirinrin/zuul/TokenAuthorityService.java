@@ -45,7 +45,7 @@ public class TokenAuthorityService {
                 p.setKey(key);
                 p.setValueIds(sets);
                 p.setUri(key.substring(24));
-                p.setUriRe(p.getUri().replaceAll("\\{[A-Za-z0-9_]+\\}", "[A-Za-z0-9_@\\.]+"));
+                p.setUriRe(p.getUri().replaceAll("\\{[A-Za-z0-9_]+\\}", "[A-Za-z0-9_@\\.-]+"));
                 permissionList.add(p);
             }
             uriReList = permissionList;
