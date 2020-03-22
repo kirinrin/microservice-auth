@@ -58,6 +58,10 @@ public class AccessFilter extends ZuulFilter {
             log.debug("OPTION请求，跳过");
             return false;
         }
+        if(is3partRequest(request.getRequestURI())){
+            log.debug("第三方URL请求，跳过 uri = {}", request.getRequestURI());
+            return false;
+        }
         return !isStaticResource(request.getRequestURI());
     }
 
@@ -109,7 +113,7 @@ public class AccessFilter extends ZuulFilter {
         }
 
         String method = request.getMethod().toLowerCase();
-        if( !is3partRequest(requestURI) && !service.validAuthoriy(tokenData, method + "@"+requestURI.substring(1))){
+        if( !service.validAuthoriy(tokenData, method + "@"+requestURI.substring(1))){
             log.warn("access token is invalid can access URI {}", requestURI);
             //过滤该请求，不往下级服务去转发请求，到此结束
             ctx.setSendZuulResponse(false);
