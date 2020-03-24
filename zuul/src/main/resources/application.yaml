@@ -41,6 +41,9 @@ zuul:
     reporter:
       path: /reporter/**
       serviceId: reporter
+    notify-service:
+      path: /notify/**
+      serviceId: notify-service
   host:
     connect-timeout-millis: 600000
     socket-timeout-millis: 600000
