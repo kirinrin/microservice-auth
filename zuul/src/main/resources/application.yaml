@@ -38,11 +38,9 @@ zuul:
     word-cloud:
       path: /word-cloud/**
       url: http://localhost:9080/
-    reporter:
-      path: /reporter/**
-      serviceId: reporter
     notify-service:
       path: /notify/**
+      strip-prefix: false
       serviceId: notify-service
   host:
     connect-timeout-millis: 600000
