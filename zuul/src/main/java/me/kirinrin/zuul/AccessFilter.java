@@ -133,10 +133,19 @@ public class AccessFilter extends ZuulFilter {
         return null;
     }
 
+    /**
+     * /urule 因为设计器，使用嵌套 iFrame vue的方式，内层的 vue 部分无法添加请求头，决定针对所有这个路径的请求都放行。
+     * /wordcloud只用于测试和开发
+     *
+     * @param uri
+     * @return
+     */
     private boolean is3partRequest(String uri) {
         if(uri.startsWith("/urule")){
             return true;
-        }else {
+        }else if(uri.startsWith("/wordcloud")){
+            return true;
+        } else{
             return false;
         }
     }

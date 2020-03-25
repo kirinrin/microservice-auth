@@ -37,7 +37,7 @@ zuul:
       serviceId: URULE-CONSOLE-SERVICE
     wordcloud:
       path: /wordcloud/**
-      url: http://localhost:9080/
+      serviceId: wordcloud
     notify-service:
       path: /notify/**
       strip-prefix: false
