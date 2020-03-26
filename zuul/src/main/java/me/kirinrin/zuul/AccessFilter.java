@@ -23,6 +23,8 @@ public class AccessFilter extends ZuulFilter {
     static final String LOGOUT_ACTION_URI = "/logout";
     static final String RES_COMPANY_KEY = "tenant_id";
     static final String[] STATIC_RESOURCE = {".js", ".css", ".png", ".jpg", ".jpeg", ".img", ".ico", ".mp4", ".mp3", ".wav"};
+    private static final String AS_TENANT_ID = "as_tenant_id";
+    private static final String CLOUD_MANAGEMENT_URI = "/cloud-managemnet";
 
     final
     TokenAuthorityService service;
@@ -54,11 +56,11 @@ public class AccessFilter extends ZuulFilter {
             //登录接口不需要校验
             return false;
         }
-        if(request.getMethod().equals(RequestMethod.OPTIONS.name())){
+        if (request.getMethod().equals(RequestMethod.OPTIONS.name())) {
             log.debug("OPTION请求，跳过");
             return false;
         }
-        if(is3partRequest(request.getRequestURI())){
+        if (is3partRequest(request.getRequestURI())) {
             log.debug("第三方URL请求，跳过 uri = {}", request.getRequestURI());
             return false;
         }
@@ -68,11 +70,11 @@ public class AccessFilter extends ZuulFilter {
     private boolean isStaticResource(String uri) {
         log.debug("静态资源跳过权限过滤器 URI = {}", uri);
         for (String res : STATIC_RESOURCE) {
-            if(uri.endsWith(res) || uri.endsWith(res.toUpperCase())){
+            if (uri.endsWith(res) || uri.endsWith(res.toUpperCase())) {
                 return true;
             }
         }
-        if(uri.startsWith("/reporter")){
+        if (uri.startsWith("/reporter")) {
             return true;
         }
         return false;
@@ -89,6 +91,7 @@ public class AccessFilter extends ZuulFilter {
 
         //获取传来的参数accessToken
         String tokenString = request.getHeader(TOKEN_KEY) != null ? request.getHeader(TOKEN_KEY) : request.getParameter(TOKEN_KEY);
+        String asTenantId = request.getHeader(AS_TENANT_ID) != null ? request.getHeader(AS_TENANT_ID) : request.getParameter(AS_TENANT_ID);
 
         if (tokenString == null) {
             log.warn("access token is empty!");
@@ -111,19 +114,32 @@ public class AccessFilter extends ZuulFilter {
             log.debug("*****************AccessFilter run end*****************");
             return null;
         }
-
-        String method = request.getMethod().toLowerCase();
-        if( !service.validAuthoriy(tokenData, method + "@"+requestURI.substring(1))){
-            log.warn("access token is invalid can access URI {}", requestURI);
-            //过滤该请求，不往下级服务去转发请求，到此结束
-            ctx.setSendZuulResponse(false);
-            ctx.setResponseStatusCode(403);
-            ctx.setResponseBody("{\"result\":\"Permission denied\"}");
-            log.debug("*****************AccessFilter run end*****************");
-            return null;
+        if(requestURI.startsWith(CLOUD_MANAGEMENT_URI)) {
+            log.info("URI是{} 跳过权限验证 as_tenant_id = {}", CLOUD_MANAGEMENT_URI, asTenantId);
+        }else{
+            String method = request.getMethod().toLowerCase();
+            if (!service.validAuthoriy(tokenData, method + "@" + requestURI.substring(1))) {
+                log.warn("access token is invalid can access URI {}", requestURI);
+                //过滤该请求，不往下级服务去转发请求，到此结束
+                ctx.setSendZuulResponse(false);
+                ctx.setResponseStatusCode(403);
+                ctx.setResponseBody("{\"result\":\"Permission denied\"}");
+                log.debug("*****************AccessFilter run end*****************");
+                return null;
+            }
+        }
+        String tenantId = tokenData.getStr("tenantId");
+        if (asTenantId != null){
+            log.info("set as_tenant_id as tenant_id {} -> {}", asTenantId, tenantId);
+            if (asTenantId.endsWith(tenantId)){
+                log.info("校验通过，可以变更tenant_id");
+                tenantId = asTenantId;
+            }
+        }else {
+            ctx.addZuulRequestHeader(RES_COMPANY_KEY, tenantId);
         }
 
-        ctx.addZuulRequestHeader(RES_COMPANY_KEY,tokenData.getStr("tenantId"));
+
         ctx.addZuulRequestHeader(USER_ID, tokenData.getStr("id"));
         ctx.addZuulRequestHeader(AGENT_ID, tokenData.getStr("agentNo"));
 
@@ -141,11 +157,11 @@ public class AccessFilter extends ZuulFilter {
      * @return
      */
     private boolean is3partRequest(String uri) {
-        if(uri.startsWith("/urule")){
+        if (uri.startsWith("/urule")) {
             return true;
-        }else if(uri.startsWith("/wordcloud")){
+        } else if (uri.startsWith("/wordcloud")) {
             return true;
-        } else{
+        } else {
             return false;
         }
     }
