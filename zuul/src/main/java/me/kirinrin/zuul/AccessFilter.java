@@ -140,11 +140,9 @@ public class AccessFilter extends ZuulFilter {
                 log.info("校验通过，可以变更tenant_id");
                 tenantId = asTenantId;
             }
-        }else {
-            ctx.addZuulRequestHeader(RES_COMPANY_KEY, tenantId);
         }
 
-
+        ctx.addZuulRequestHeader(RES_COMPANY_KEY, tenantId);
         ctx.addZuulRequestHeader(USER_ID, tokenData.getStr("id"));
         ctx.addZuulRequestHeader(AGENT_ID, tokenData.getStr("agentNo"));
 
