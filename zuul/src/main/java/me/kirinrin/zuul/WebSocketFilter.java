@@ -11,11 +11,13 @@ import javax.servlet.http.HttpServletRequest;
  * @Classname WebSocketFilter
  * @Description TODO
  * @Date 2020/3/16 10:47 下午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 @Component
 @Slf4j
 public class WebSocketFilter  extends ZuulFilter {
+    static final String WEB_SOCKET = "websocket";
+
     @Override
     public String filterType() {
         return "pre";
@@ -37,7 +39,7 @@ public class WebSocketFilter  extends ZuulFilter {
         if (null == upgradeHeader) {
             upgradeHeader = request.getHeader("upgrade");
         }
-        if (null != upgradeHeader && "websocket".equalsIgnoreCase(upgradeHeader)) {
+        if (null != upgradeHeader && WEB_SOCKET.equalsIgnoreCase(upgradeHeader)) {
             context.addZuulRequestHeader("connection", "Upgrade");
         }
         return null;

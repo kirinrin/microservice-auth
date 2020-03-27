@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @Classname User
  * @Description 用于封装从redis中读取的token 用户对像
  * @Date 2020/3/12 2:11 下午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 @Data
 @AllArgsConstructor

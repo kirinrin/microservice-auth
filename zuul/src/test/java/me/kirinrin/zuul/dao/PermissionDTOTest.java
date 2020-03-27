@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @Classname PermissionDTOTest
  * @Description TODO
  * @Date 2020/3/13 3:58 下午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 class PermissionDTOTest {
 

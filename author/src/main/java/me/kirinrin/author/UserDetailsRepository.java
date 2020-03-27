@@ -33,8 +33,6 @@ public class UserDetailsRepository {
         SysUser sysUser = new SysUser();
         sysUser.setUsername(user.getUsername());
         sysUser.setEncodePassword(user.getPassword());
-//        sysUser.setPermissions();
-        //todo 自行排重
         sysUserService.addUser(sysUser);
 
     }
@@ -49,7 +47,6 @@ public class UserDetailsRepository {
         SysUser sysUser = new SysUser();
         sysUser.setUsername(user.getUsername());
         sysUser.setEncodePassword(user.getPassword());
-//        sysUser.setPermissions();
 
         sysUserService.updateUser(sysUser);
     }

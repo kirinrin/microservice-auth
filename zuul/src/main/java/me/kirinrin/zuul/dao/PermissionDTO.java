@@ -11,7 +11,7 @@ import java.util.*;
  * @Classname Policy业务数据
  * @Description 封装Policy数据
  * @Date 2020/3/13 11:37 上午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 @Data
 @Builder
@@ -19,6 +19,7 @@ import java.util.*;
 public class PermissionDTO {
     private String id;
     private String uri;
+    static final String AUTH_REF_SPLIT_CHAT = "ref@";
 
     /**
      * 翻转Permission数据对应关系
@@ -58,7 +59,7 @@ public class PermissionDTO {
     public static Map<String, Set<String>> revertPermission(List<PermissionDTO> srcData) throws ClassNotFoundException {
         Map<String, Set<String>> map = new HashMap<String, Set<String>>(200);
         for (PermissionDTO next : srcData) {
-            if (!next.getUri().startsWith("ref@")) {
+            if (!next.getUri().startsWith(AUTH_REF_SPLIT_CHAT)) {
                 Set<String> idSets = new HashSet<String>();
                 idSets.add(next.getId());
                 map.put(next.getUri(), idSets);
@@ -67,7 +68,7 @@ public class PermissionDTO {
 
         // 这种算法，只考虑了最外层有只有一层有* 的情况，对于 ref - ref* - uri 这种 或是多层 * 没有处理
         for (PermissionDTO next : srcData) {
-            if (next.getUri().startsWith("ref@")) {
+            if (next.getUri().startsWith(AUTH_REF_SPLIT_CHAT)) {
                 String refUri = next.getUri().substring(4);
                 for (PermissionDTO sub : srcData) {
                     if (match(refUri, sub.getId())) {
@@ -85,7 +86,7 @@ public class PermissionDTO {
 
     private static String findMatchId(List<PermissionDTO> srcData, PermissionDTO next) throws ClassNotFoundException {
         Optional<PermissionDTO> optionPermission = null;
-        if(next.getUri().startsWith("ref@")){
+        if(next.getUri().startsWith(AUTH_REF_SPLIT_CHAT)){
             String refUri = next.getUri().substring(4);
             optionPermission = srcData.stream().filter(d -> d.getId().equals(refUri)).findFirst();
         }else{
@@ -94,7 +95,7 @@ public class PermissionDTO {
         if (optionPermission.isPresent()) {
             PermissionDTO orgPermission = optionPermission.get();
             log.debug("查找到最终 {} -> {}", next.getUri(), orgPermission);
-            if (orgPermission.getUri().startsWith("ref@")) {
+            if (orgPermission.getUri().startsWith(AUTH_REF_SPLIT_CHAT)) {
                 // ref 继续查找
                 return findMatchId(srcData, orgPermission);
             } else {
@@ -122,19 +123,19 @@ public class PermissionDTO {
         char c; // 当前要匹配的字符串
         boolean beforeStar = false;
         // 是否遇到通配符*
-        int back_i = 0;
+        int backI = 0;
         // 回溯,当遇到通配符时,匹配不成功则回溯
-        int back_j = 0;
+        int backJ = 0;
         int i, j;
         for (i = 0, j = 0; i < str.length(); ) {
             if (pattern.length() <= j) {
-                if (back_i != 0) {
+                if (backI != 0) {
                     // 有通配符,但是匹配未成功,回溯
                     beforeStar = true;
-                    i = back_i;
-                    j = back_j;
-                    back_i = 0;
-                    back_j = 0;
+                    i = backI;
+                    j = backJ;
+                    backI = 0;
+                    backJ = 0;
                     continue;
                 }
                 break;
@@ -154,20 +155,20 @@ public class PermissionDTO {
             if (beforeStar) {
                 if (str.charAt(i) == c) {
                     beforeStar = false;
-                    back_i = i + 1;
-                    back_j = j;
+                    backI = i + 1;
+                    backJ = j;
                     j++;
                 }
             } else {
                 if (c != '?' && c != str.charAt(i)) {
                     result = false;
-                    if (back_i != 0) {
+                    if (backI != 0) {
                         // 有通配符,但是匹配未成功,回溯
                         beforeStar = true;
-                        i = back_i;
-                        j = back_j;
-                        back_i = 0;
-                        back_j = 0;
+                        i = backI;
+                        j = backJ;
+                        backI = 0;
+                        backJ = 0;
                         continue;
                     }
                     break;

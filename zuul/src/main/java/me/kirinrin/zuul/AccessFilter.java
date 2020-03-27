@@ -24,10 +24,14 @@ public class AccessFilter extends ZuulFilter {
     static final String AGENT_ID = "user_agent_no";
     static final String LOGIN_ACTION_URI = "/login";
     static final String LOGOUT_ACTION_URI = "/logout";
+    static final String REPORTER_URI = "/reporter";
+    static final String URULE_URI = "/urule";
+    static final String WORDCLOUD_URI = "/wordcloud";
     static final String RES_COMPANY_KEY = "tenant_id";
     static final String[] STATIC_RESOURCE = {".js", ".css", ".png", ".jpg", ".jpeg", ".img", ".ico", ".mp4", ".mp3", ".wav"};
-    private static final String AS_TENANT_ID = "as_tenant_id";
-    private static final String CLOUD_MANAGEMENT_URI = "/cloud-managemnet";
+    static final String AS_TENANT_ID = "as_tenant_id";
+    static final String AUTH_SPLIT_CHAT= "@";
+
 
     final
     TokenAuthorityService service;
@@ -77,7 +81,7 @@ public class AccessFilter extends ZuulFilter {
                 return true;
             }
         }
-        if (uri.startsWith("/reporter")) {
+        if (uri.startsWith(REPORTER_URI)) {
             return true;
         }
         return false;
@@ -88,9 +92,9 @@ public class AccessFilter extends ZuulFilter {
         log.debug("*****************AccessFilter run start*****************");
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
-        String requestURI = request.getRequestURI();
+        String requestUri = request.getRequestURI();
 
-        log.info("网关接收请求 {} URL {} method = {}", request.getMethod(), requestURI, request.getMethod());
+        log.info("网关接收请求 {} URL {} method = {}", request.getMethod(), requestUri, request.getMethod());
 
         //获取传来的参数accessToken
         String tokenString = request.getHeader(TOKEN_KEY) != null ? request.getHeader(TOKEN_KEY) : request.getParameter(TOKEN_KEY);
@@ -123,8 +127,8 @@ public class AccessFilter extends ZuulFilter {
 
         }else{
             String method = request.getMethod().toLowerCase();
-            if (!service.validAuthoriy(tokenData, method + "@" + requestURI.substring(1))) {
-                log.warn("access token is invalid can access URI {}", requestURI);
+            if (!service.validAuthoriy(tokenData, method + AUTH_SPLIT_CHAT + requestUri.substring(1))) {
+                log.warn("access token is invalid can access URI {}", requestUri);
                 //过滤该请求，不往下级服务去转发请求，到此结束
                 ctx.setSendZuulResponse(false);
                 ctx.setResponseStatusCode(403);
@@ -147,7 +151,7 @@ public class AccessFilter extends ZuulFilter {
         ctx.addZuulRequestHeader(AGENT_ID, tokenData.getStr("agentNo"));
 
 
-        log.info("网关接收请求验证通过 {} URL {}", request.getMethod(), requestURI);
+        log.info("网关接收请求验证通过 {} URL {}", request.getMethod(), requestUri);
         log.debug("*****************AccessFilter run end*****************");
         return null;
     }
@@ -169,9 +173,9 @@ public class AccessFilter extends ZuulFilter {
      * @return
      */
     private boolean is3partRequest(String uri) {
-        if (uri.startsWith("/urule")) {
+        if (uri.startsWith(URULE_URI)) {
             return true;
-        } else if (uri.startsWith("/wordcloud")) {
+        } else if (uri.startsWith(WORDCLOUD_URI)) {
             return true;
         } else {
             return false;

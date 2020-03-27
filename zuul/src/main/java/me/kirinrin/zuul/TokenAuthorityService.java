@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * @Classname TokenService
  * @Description 处理相关token的读写与认证权限
  * @Date 2020/3/12 2:27 下午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 @Service
 @Slf4j
@@ -196,19 +196,19 @@ public class TokenAuthorityService {
         char c; // 当前要匹配的字符串
         boolean beforeStar = false;
         // 是否遇到通配符*
-        int back_i = 0;
+        int backI = 0;
         // 回溯,当遇到通配符时,匹配不成功则回溯
-        int back_j = 0;
+        int backJ = 0;
         int i, j;
         for (i = 0, j = 0; i < str.length();) {
             if (pattern.length() <= j) {
-                if (back_i != 0) {
+                if (backI != 0) {
                     // 有通配符,但是匹配未成功,回溯
                     beforeStar = true;
-                    i = back_i;
-                    j = back_j;
-                    back_i = 0;
-                    back_j = 0;
+                    i = backI;
+                    j = backJ;
+                    backI = 0;
+                    backJ = 0;
                     continue;
                 }
                 break;
@@ -228,20 +228,20 @@ public class TokenAuthorityService {
             if (beforeStar) {
                 if (str.charAt(i) == c) {
                     beforeStar = false;
-                    back_i = i + 1;
-                    back_j = j;
+                    backI = i + 1;
+                    backJ = j;
                     j++;
                 }
             } else {
                 if (c != '?' && c != str.charAt(i)) {
                     result = false;
-                    if (back_i != 0) {
+                    if (backI != 0) {
                         // 有通配符,但是匹配未成功,回溯
                         beforeStar = true;
-                        i = back_i;
-                        j = back_j;
-                        back_i = 0;
-                        back_j = 0;
+                        i = backI;
+                        j = backJ;
+                        backI = 0;
+                        backJ = 0;
                         continue;
                     }
                     break;

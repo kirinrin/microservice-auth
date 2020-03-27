@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
  * @Classname CorePostFilter
  * @Description CORS前置过滤器
  * @Date 2020/3/16 10:02 下午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 @Component
 @Slf4j

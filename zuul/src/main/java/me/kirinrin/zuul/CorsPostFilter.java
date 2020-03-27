@@ -18,11 +18,15 @@ import java.util.Map;
  * @Classname CorePostFilter
  * @Description CORS前置过滤器
  * @Date 2020/3/16 10:02 下午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 @Component
 @Slf4j
 public class CorsPostFilter extends ZuulFilter {
+
+    static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+    static final String ORIGIN = "Origin";
+
     @Override
     public String filterType() {
         /*
@@ -75,8 +79,6 @@ public class CorsPostFilter extends ZuulFilter {
         log.debug("end all header....");
     }
 
-    static final String Access_Control_Allow_Origin = "Access-Control-Allow-Origin";
-    static final String ORIGIN = "Origin";
     @Override
     public Object run() {
         log.debug("*****************CorsPostFilter run start*****************");
@@ -85,7 +87,7 @@ public class CorsPostFilter extends ZuulFilter {
         ctx.getOriginResponseHeaders();
         List<Pair<String, String>> originHeaders = ctx.getOriginResponseHeaders();
         for (Pair<String, String> header : originHeaders) {
-            if (header.first().equalsIgnoreCase(Access_Control_Allow_Origin)){
+            if (header.first().equalsIgnoreCase(ACCESS_CONTROL_ALLOW_ORIGIN)){
                 log.debug("下游服务返回了CORS头 Access_Control_Allow_Origin = {}", header.second());
                 ctx.setSendZuulResponse(true);
                 log.debug("*****************CorsPostFilter run end*****************");
@@ -93,7 +95,7 @@ public class CorsPostFilter extends ZuulFilter {
             }
         }
         log.debug("下游服务无CORS头, 添加");
-        response.setHeader(Access_Control_Allow_Origin, "*");
+        response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         response.setHeader("Access-Control-Allow-Credentials","true");
         response.setHeader("Access-Control-Expose-Headers","X-forwared-port, X-forwarded-host");
         //允许继续路由

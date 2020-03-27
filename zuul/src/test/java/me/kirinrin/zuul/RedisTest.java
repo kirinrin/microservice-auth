@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @Classname RedisTest
  * @Description 测试Redis的基本操作和使用
  * @Date 2020/3/12 1:47 下午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 @SpringBootTest
 public class RedisTest {

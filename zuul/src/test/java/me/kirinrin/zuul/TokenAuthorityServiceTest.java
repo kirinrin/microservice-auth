@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @Classname TokenAuthorityServiceTest
  * @Description 测试权限服务类
  * @Date 2020/3/12 3:59 下午
- * @Created by Kirinrin
+ * @author by Kirinrin
  */
 @SpringBootTest
 class TokenAuthorityServiceTest {
