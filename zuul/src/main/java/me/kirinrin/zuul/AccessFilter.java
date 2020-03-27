@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Kirinrin
+ *
+ * 测试请求
+ * curl -H "as_tenant_id:wechat.cas-online.com" -H "access_token:admin:BQBVCl0NUwQVVwRWARwGA1IBFANcXl1DC1RUCgxRVVcDVw0A" http://localhost:7070/system/x
  */
 @Component
 @Slf4j
@@ -114,8 +117,10 @@ public class AccessFilter extends ZuulFilter {
             log.debug("*****************AccessFilter run end*****************");
             return null;
         }
-        if(requestURI.startsWith(CLOUD_MANAGEMENT_URI)) {
-            log.info("URI是{} 跳过权限验证 as_tenant_id = {}", CLOUD_MANAGEMENT_URI, asTenantId);
+        String tenantId = tokenData.getStr("tenantId");
+        if(isChildDomainAccess(tenantId, asTenantId)) {
+            log.info("是子域访问放行所有请求，不进行权限验证 tenantId = {}  as_tenant_id = {}", tenantId, asTenantId);
+
         }else{
             String method = request.getMethod().toLowerCase();
             if (!service.validAuthoriy(tokenData, method + "@" + requestURI.substring(1))) {
@@ -128,7 +133,7 @@ public class AccessFilter extends ZuulFilter {
                 return null;
             }
         }
-        String tenantId = tokenData.getStr("tenantId");
+
         if (asTenantId != null){
             log.info("set as_tenant_id as tenant_id {} -> {}", asTenantId, tenantId);
             if (asTenantId.endsWith(tenantId)){
@@ -147,6 +152,15 @@ public class AccessFilter extends ZuulFilter {
         log.info("网关接收请求验证通过 {} URL {}", request.getMethod(), requestURI);
         log.debug("*****************AccessFilter run end*****************");
         return null;
+    }
+
+
+    private boolean isChildDomainAccess(String domain, String childDomain) {
+        if (domain != null && childDomain != null && childDomain.endsWith(domain)){
+            return true;
+        }else {
+            return false;
+        }
     }
 
     /**
