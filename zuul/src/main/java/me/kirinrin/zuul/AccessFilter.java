@@ -160,6 +160,7 @@ public class AccessFilter extends ZuulFilter {
     }
 
     private boolean isCloudManagementRequest(String requestUri) {
+        log.info("跳过 URI 权限认证判断", requestUri);
         return requestUri.startsWith(CLOUD_MANAGEMENT_URI);
     }
 
