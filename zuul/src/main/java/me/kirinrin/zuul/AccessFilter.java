@@ -27,6 +27,7 @@ public class AccessFilter extends ZuulFilter {
     static final String REPORTER_URI = "/reporter";
     static final String URULE_URI = "/urule";
     static final String WORDCLOUD_URI = "/wordcloud";
+    static final String CLOUD_MANAGEMENT_URI = "/cloud-managemnet";
     static final String RES_COMPANY_KEY = "tenant_id";
     static final String[] STATIC_RESOURCE = {".js", ".css", ".png", ".jpg", ".jpeg", ".img", ".ico", ".mp4", ".mp3", ".wav"};
     static final String AS_TENANT_ID = "as_tenant_id";
@@ -122,7 +123,9 @@ public class AccessFilter extends ZuulFilter {
             return null;
         }
         String tenantId = tokenData.getStr("tenantId");
-        if(isChildDomainAccess(tenantId, asTenantId)) {
+        if (isCloudManagementRequest(requestUri)){
+            log.info("访问 {} 跳过权限认证", requestUri);
+        }else if(isChildDomainAccess(tenantId, asTenantId)) {
             log.info("是子域访问放行所有请求，不进行权限验证 tenantId = {}  as_tenant_id = {}", tenantId, asTenantId);
 
         }else{
@@ -154,6 +157,10 @@ public class AccessFilter extends ZuulFilter {
         log.info("网关接收请求验证通过 {} URL {}", request.getMethod(), requestUri);
         log.debug("*****************AccessFilter run end*****************");
         return null;
+    }
+
+    private boolean isCloudManagementRequest(String requestUri) {
+        return requestUri.startsWith(CLOUD_MANAGEMENT_URI);
     }
 
 
