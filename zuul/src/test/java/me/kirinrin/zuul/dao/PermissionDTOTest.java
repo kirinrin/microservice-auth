@@ -46,4 +46,13 @@ class PermissionDTOTest {
             assertEquals(result.get(s).size(),3);
         }
     }
+
+    @Test
+    void testURIstart(){
+        String x = "/cloud-management/tenant";
+        String y = "/cloud-managemnet";
+        System.out.println(x.startsWith(y));
+        System.out.println(y.startsWith(x));
+        System.out.println(x.startsWith("/cloud-manage"));
+    }
 }

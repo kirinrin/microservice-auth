@@ -43,9 +43,9 @@ zuul:
       strip-prefix: false
       serviceId: notify-service
     cloud-managemnet:
-      path: /cloud-managemnet/**
+      path: /cloud-management/**
       strip-prefix: false
-      serviceId: cloud-managemnet
+      serviceId: cloud-management
   host:
     connect-timeout-millis: 600000
     socket-timeout-millis: 600000

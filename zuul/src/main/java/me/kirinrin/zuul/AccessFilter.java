@@ -27,7 +27,7 @@ public class AccessFilter extends ZuulFilter {
     static final String REPORTER_URI = "/reporter";
     static final String URULE_URI = "/urule";
     static final String WORDCLOUD_URI = "/wordcloud";
-    static final String CLOUD_MANAGEMENT_URI = "/cloud-managemnet";
+    static final String CLOUD_MANAGEMENT_URI = "/cloud-management";
     static final String RES_COMPANY_KEY = "tenant_id";
     static final String[] STATIC_RESOURCE = {".js", ".css", ".png", ".jpg", ".jpeg", ".img", ".ico", ".mp4", ".mp3", ".wav"};
     static final String AS_TENANT_ID = "as_tenant_id";
@@ -117,7 +117,7 @@ public class AccessFilter extends ZuulFilter {
             log.warn("access token is invalid!");
             //过滤该请求，不往下级服务去转发请求，到此结束
             ctx.setSendZuulResponse(false);
-            ctx.setResponseStatusCode(403);
+            ctx.setResponseStatusCode(401);
             ctx.setResponseBody("{\"result\":\"accessToken is invalid!\"}");
             log.debug("*****************AccessFilter run end*****************");
             return null;
