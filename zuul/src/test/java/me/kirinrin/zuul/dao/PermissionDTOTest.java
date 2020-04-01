@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,5 +55,14 @@ class PermissionDTOTest {
         System.out.println(x.startsWith(y));
         System.out.println(y.startsWith(x));
         System.out.println(x.startsWith("/cloud-manage"));
+    }
+
+    @Test
+    void uriTest(){
+        String uri = "/sys/user/admin@*.car.cas-online.com/groups";
+        String re ="/sys/user/[A-Za-z0-9_@\\.\\*-]+/groups";
+        String x =  "[A-Za-z0-9_@\\.-\\*]+";
+        boolean result = Pattern.matches(re, uri);
+        assertTrue(result);
     }
 }

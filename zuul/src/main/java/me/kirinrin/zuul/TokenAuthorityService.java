@@ -101,8 +101,7 @@ public class TokenAuthorityService {
      * @param uri
      */
     public boolean validAuthoriy(JSONObject tokenData, String uri) {
-
-
+        log.info("验证是否有权限可以访问URI = {} data = {}", uri, tokenData);
         JSONArray actions = tokenData.getJSONArray("actions");
 
         PermissionSetDTO matchUriData = findMatchUri(uri);
