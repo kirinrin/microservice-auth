@@ -22,6 +22,8 @@ public class AccessFilter extends ZuulFilter {
     static final String TOKEN_KEY = "access_token";
     static final String USER_ID = "user_id";
     static final String AGENT_ID = "user_agent_no";
+    static final String USER_ID_KEY = "id";
+    static final String AGENT_ID_KEY = "agentNo";
     static final String LOGIN_ACTION_URI = "/login";
     static final String LOGOUT_ACTION_URI = "/logout";
     static final String REPORTER_URI = "/reporter";
@@ -32,7 +34,7 @@ public class AccessFilter extends ZuulFilter {
     static final String[] STATIC_RESOURCE = {".js", ".css", ".png", ".jpg", ".jpeg", ".img", ".ico", ".mp4", ".mp3", ".wav"};
     static final String AS_TENANT_ID = "as_tenant_id";
     static final String AUTH_SPLIT_CHAT= "@";
-
+    static final String TENANT_ID = "tenantId";
 
     final
     TokenAuthorityService service;
@@ -122,7 +124,7 @@ public class AccessFilter extends ZuulFilter {
             log.debug("*****************AccessFilter run end*****************");
             return null;
         }
-        String tenantId = tokenData.getStr("tenantId");
+        String tenantId = tokenData.getStr(TENANT_ID);
         if (isCloudManagementRequest(requestUri)){
             log.info("访问 {} 跳过权限认证", requestUri);
         }else if(isChildDomainAccess(tenantId, asTenantId)) {
@@ -150,8 +152,8 @@ public class AccessFilter extends ZuulFilter {
         }
 
         ctx.addZuulRequestHeader(RES_COMPANY_KEY, tenantId);
-        ctx.addZuulRequestHeader(USER_ID, tokenData.getStr("id"));
-        ctx.addZuulRequestHeader(AGENT_ID, tokenData.getStr("agentNo"));
+        ctx.addZuulRequestHeader(USER_ID, tokenData.getStr(USER_ID_KEY));
+        ctx.addZuulRequestHeader(AGENT_ID, tokenData.getStr(AGENT_ID_KEY));
 
 
         log.info("网关接收请求验证通过 {} URL {}", request.getMethod(), requestUri);
