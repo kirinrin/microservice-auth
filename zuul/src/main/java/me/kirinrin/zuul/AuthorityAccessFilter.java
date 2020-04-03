@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static me.kirinrin.zuul.Constants.CLOUD_MANAGEMENT_TENANT_ID;
+import static me.kirinrin.zuul.RequestUtil.*;
+
 /**
  * @author Kirinrin
  *
@@ -17,29 +20,12 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Component
 @Slf4j
-public class AccessFilter extends ZuulFilter {
-
-    static final String TOKEN_KEY = "access_token";
-    static final String USER_ID = "user_id";
-    static final String AGENT_ID = "user_agent_no";
-    static final String USER_ID_KEY = "id";
-    static final String AGENT_ID_KEY = "agentNo";
-    static final String LOGIN_ACTION_URI = "/login";
-    static final String LOGOUT_ACTION_URI = "/logout";
-    static final String REPORTER_URI = "/reporter";
-    static final String URULE_URI = "/urule";
-    static final String WORDCLOUD_URI = "/wordcloud";
-    static final String CLOUD_MANAGEMENT_URI = "/cloud-management";
-    static final String RES_COMPANY_KEY = "tenant_id";
-    static final String[] STATIC_RESOURCE = {".js", ".css", ".png", ".jpg", ".jpeg", ".img", ".ico", ".mp4", ".mp3", ".wav"};
-    static final String AS_TENANT_ID = "as_tenant_id";
-    static final String AUTH_SPLIT_CHAT= "@";
-    static final String TENANT_ID = "tenantId";
+public class AuthorityAccessFilter extends ZuulFilter {
 
     final
     TokenAuthorityService service;
 
-    public AccessFilter(TokenAuthorityService service) {
+    public AuthorityAccessFilter(TokenAuthorityService service) {
         this.service = service;
     }
 
@@ -62,11 +48,11 @@ public class AccessFilter extends ZuulFilter {
         HttpServletRequest request = RequestContext.getCurrentContext().getRequest();
         log.debug("判断请求是否执行权限过滤器 URI = {}", request.getRequestURI());
         //不需要token校验的URL
-        if (LOGIN_ACTION_URI.equalsIgnoreCase(request.getRequestURI()) || LOGOUT_ACTION_URI.equalsIgnoreCase(request.getRequestURI())) {
-            //登录接口不需要校验
+        if (isLoginLogoutRequest(request.getRequestURI())) {
+            log.debug("登录登出请求，跳过");
             return false;
         }
-        if (request.getMethod().equals(RequestMethod.OPTIONS.name())) {
+        if (isOptionRequest(request.getMethod())) {
             log.debug("OPTION请求，跳过");
             return false;
         }
@@ -74,20 +60,11 @@ public class AccessFilter extends ZuulFilter {
             log.debug("第三方URL请求，跳过 uri = {}", request.getRequestURI());
             return false;
         }
-        return !isStaticResource(request.getRequestURI());
-    }
-
-    private boolean isStaticResource(String uri) {
-        log.debug("静态资源跳过权限过滤器 URI = {}", uri);
-        for (String res : STATIC_RESOURCE) {
-            if (uri.endsWith(res) || uri.endsWith(res.toUpperCase())) {
-                return true;
-            }
+        if (isStaticResource(request.getRequestURI())){
+            log.debug("静态资源请求，跳过");
+            return false;
         }
-        if (uri.startsWith(REPORTER_URI)) {
-            return true;
-        }
-        return false;
+        return true;
     }
 
     @Override
@@ -100,8 +77,8 @@ public class AccessFilter extends ZuulFilter {
         log.info("网关接收请求 {} URL {} method = {}", request.getMethod(), requestUri, request.getMethod());
 
         //获取传来的参数accessToken
-        String tokenString = request.getHeader(TOKEN_KEY) != null ? request.getHeader(TOKEN_KEY) : request.getParameter(TOKEN_KEY);
-        String asTenantId = request.getHeader(AS_TENANT_ID) != null ? request.getHeader(AS_TENANT_ID) : request.getParameter(AS_TENANT_ID);
+        String tokenString = request.getHeader(Constants.TOKEN_KEY) != null ? request.getHeader(Constants.TOKEN_KEY) : request.getParameter(Constants.TOKEN_KEY);
+        String asTenantId = request.getHeader(Constants.AS_TENANT_ID) != null ? request.getHeader(Constants.AS_TENANT_ID) : request.getParameter(Constants.AS_TENANT_ID);
 
         if (tokenString == null) {
             log.warn("access token is empty!");
@@ -124,15 +101,25 @@ public class AccessFilter extends ZuulFilter {
             log.debug("*****************AccessFilter run end*****************");
             return null;
         }
-        String tenantId = tokenData.getStr(TENANT_ID);
+        String tenantId = tokenData.getStr(Constants.TENANT_ID);
         if (isCloudManagementRequest(requestUri)){
-            log.info("访问 {} 跳过权限认证", requestUri);
+            log.info("访问 {} 跳过权限认证但要求tenantId是主域的", requestUri);
+            if (CLOUD_MANAGEMENT_TENANT_ID.equalsIgnoreCase(tenantId)){
+                log.info("验证tenantId通过 {}", tenantId);
+                return null;
+            }
+
+            ctx.setSendZuulResponse(false);
+            ctx.setResponseStatusCode(403);
+            ctx.setResponseBody("{\"result\":\"Access CloudManagement Permission denied wrong account domain\"}");
+            log.debug("*****************AccessFilter run end*****************");
+            return null;
         }else if(isChildDomainAccess(tenantId, asTenantId)) {
             log.info("是子域访问放行所有请求，不进行权限验证 tenantId = {}  as_tenant_id = {}", tenantId, asTenantId);
 
         }else{
             String method = request.getMethod().toLowerCase();
-            if (!service.validAuthoriy(tokenData, method + AUTH_SPLIT_CHAT + requestUri.substring(1))) {
+            if (!service.validAuthoriy(tokenData, method + Constants.AUTH_SPLIT_CHAT + requestUri.substring(1))) {
                 log.warn("access token is invalid can access URI {}", requestUri);
                 //过滤该请求，不往下级服务去转发请求，到此结束
                 ctx.setSendZuulResponse(false);
@@ -151,46 +138,14 @@ public class AccessFilter extends ZuulFilter {
             }
         }
 
-        ctx.addZuulRequestHeader(RES_COMPANY_KEY, tenantId);
-        ctx.addZuulRequestHeader(USER_ID, tokenData.getStr(USER_ID_KEY));
-        ctx.addZuulRequestHeader(AGENT_ID, tokenData.getStr(AGENT_ID_KEY));
+        ctx.addZuulRequestHeader(Constants.RES_COMPANY_KEY, tenantId);
+        ctx.addZuulRequestHeader(Constants.USER_ID, tokenData.getStr(Constants.USER_ID_KEY));
+        ctx.addZuulRequestHeader(Constants.AGENT_ID, tokenData.getStr(Constants.AGENT_ID_KEY));
 
 
         log.info("网关接收请求验证通过 {} URL {}", request.getMethod(), requestUri);
         log.debug("*****************AccessFilter run end*****************");
         return null;
     }
-
-    private boolean isCloudManagementRequest(String requestUri) {
-        log.info("跳过 URI 权限认证判断", requestUri);
-        return requestUri.startsWith(CLOUD_MANAGEMENT_URI);
-    }
-
-
-    private boolean isChildDomainAccess(String domain, String childDomain) {
-        if (domain != null && childDomain != null && childDomain.endsWith(domain)){
-            return true;
-        }else {
-            return false;
-        }
-    }
-
-    /**
-     * /urule 因为设计器，使用嵌套 iFrame vue的方式，内层的 vue 部分无法添加请求头，决定针对所有这个路径的请求都放行。
-     * /wordcloud只用于测试和开发
-     *
-     * @param uri
-     * @return
-     */
-    private boolean is3partRequest(String uri) {
-        if (uri.startsWith(URULE_URI)) {
-            return true;
-        } else if (uri.startsWith(WORDCLOUD_URI)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 
 }

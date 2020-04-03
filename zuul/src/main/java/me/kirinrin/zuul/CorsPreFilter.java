@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static me.kirinrin.zuul.RequestUtil.isOptionRequest;
+
 /**
  * @Classname CorePostFilter
  * @Description CORS前置过滤器
@@ -34,7 +36,7 @@ public class CorsPreFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
         //只过滤OPTIONS 请求
-        if(request.getMethod().equals(RequestMethod.OPTIONS.name())){
+        if(isOptionRequest(request.getMethod())){
             log.debug("执行前置CORE过滤器");
             return true;
         }

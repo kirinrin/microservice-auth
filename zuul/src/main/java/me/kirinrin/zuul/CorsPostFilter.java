@@ -14,6 +14,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
+import static me.kirinrin.zuul.RequestUtil.isOptionRequest;
+
 /**
  * @Classname CorePostFilter
  * @Description CORS前置过滤器
@@ -50,7 +52,7 @@ public class CorsPostFilter extends ZuulFilter {
         HttpServletRequest request = ctx.getRequest();
         printHeaderInfo(ctx, request);
         //过滤各种POST请求
-        if(request.getMethod().equals(RequestMethod.OPTIONS.name()) || request.getHeader(ORIGIN) == null){
+        if(isOptionRequest(request.getMethod()) || request.getHeader(ORIGIN) == null){
             log.debug("忽略后置CORE过滤器");
             return false;
         }
