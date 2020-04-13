@@ -3,7 +3,10 @@
 #
 #
 FROM registry.cn-beijing.aliyuncs.com/suplus_main/openjdk:8
+# 关联系统时间
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+# JVM时区
+ENV TZ=Asia/Shanghai
 VOLUME /tmp
 WORKDIR  /app
 ARG JAR_FILE=target/*.jar

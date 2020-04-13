@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 
 import static me.kirinrin.zuul.RequestUtil.isOptionRequest;
 
@@ -25,7 +26,7 @@ import static me.kirinrin.zuul.RequestUtil.isOptionRequest;
 @Component
 @Slf4j
 public class CorsPostFilter extends ZuulFilter {
-
+    
     static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     static final String ORIGIN = "Origin";
 
